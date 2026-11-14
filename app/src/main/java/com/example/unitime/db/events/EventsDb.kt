@@ -47,14 +47,6 @@ interface EventsDao {
     @Query("SELECT * FROM ${Event.TABLE_NAME} ORDER BY ${Event.ACTIVITY_DATE} ASC")
     fun observeAllWithTags(): Flow<List<EventWithTags>>
 
-    @Transaction
-    @Query("""
-        SELECT * FROM ${Event.TABLE_NAME}
-        WHERE ${Event.ACTIVITY_DATE} >= :now
-        ORDER BY ${Event.ACTIVITY_DATE} ASC
-    """)
-    fun observeUpcomingWithTags(now: Long = System.currentTimeMillis()): Flow<List<EventWithTags>>
-
     // * «активности с конкретным тегом»
     @Transaction
     @Query("""
@@ -75,7 +67,7 @@ interface EventsDao {
     @Transaction
     suspend fun insertEventWithTags(event: Event, tagIds: List<Long>): Long {
         val eventId = insert(event)
-        if (tagIds.isNotEmpty()) {
+        if (eventId > 0 && tagIds.isNotEmpty()) {
             insertCrossRefs(tagIds.map { EventTagCrossRef(eventId = eventId, tagId = it) })
         }
         return eventId
@@ -88,15 +80,19 @@ interface EventsDao {
     ORDER BY ${Event.ACTIVITY_DATE} ASC
     """)
     fun observeByCategoryWithTags(category: String): Flow<List<EventWithTags>>
+
     @Transaction
     @Query("""
     SELECT * FROM ${Event.TABLE_NAME}
     WHERE ${Event.ACTIVITY_DATE} >= :now
     ORDER BY ${Event.ACTIVITY_DATE} ASC
     """)
-    fun observeUpcoming(
-        now: Long = System.currentTimeMillis()
-    ): Flow<List<EventWithTags>>
+    fun observeUpcoming(now: Long = System.currentTimeMillis()): Flow<List<EventWithTags>>
+
+    // * «все активности» (без фильтра по дате)
+    @Transaction
+    @Query("SELECT * FROM ${Event.TABLE_NAME} ORDER BY ${Event.ACTIVITY_DATE} ASC")
+    fun observeAll(): Flow<List<EventWithTags>>
 }
 
 @Dao

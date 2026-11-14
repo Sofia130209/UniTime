@@ -11,7 +11,7 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.unitime.db.events.Event
+import com.example.unitime.db.events.EventRepository
 import com.example.unitime.db.events.EventsDbProvider
 import kotlinx.coroutines.launch
 
@@ -38,11 +38,12 @@ class MainActivity : AppCompatActivity() {
         recycler.adapter = adapter
 
         val db = EventsDbProvider.get(this)
+        val repository = EventRepository(db.getEventsDao(), db.getTagDao())
         lifecycleScope.launch {
-            db.getEventsDao()
-                .observeUpcoming()
+            // * Repository возвращает уже готовый Flow<List<Event>> — никаких кастов
+            repository.observeUpcoming()
                 .collect { events ->
-                    adapter.submitList(events as List<Event?>?)
+                    adapter.submitList(events)
                     emptyView.visibility =
                         if (events.isEmpty()) View.VISIBLE else View.GONE
                 }

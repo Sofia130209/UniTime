@@ -61,6 +61,9 @@ class LoginActivity : ComponentActivity() {
                     val isLoggedIn = userManager.logUser(user)
 
                     if (isLoggedIn) {
+                        // * сохраняем сессию, чтобы при повторном запуске сразу открывался главный экран
+                        SessionManager(this@LoginActivity).saveSession(login)
+
                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
                         startActivity(intent)
 
