@@ -14,7 +14,7 @@
         android:theme="@style/Theme.UniTime">
 
         <activity
-            android:name=".SplashActivity"
+            android:name=".ui.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,12 +22,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name=".ui.auth.LoginActivity"
             android:windowSoftInputMode="adjustResize" />
-        <activity android:name=".MainActivity" />
-        <activity android:name=".RegistrationActivity" />
-        <activity android:name=".AddEventActivity" />
-        <activity android:name=".EventDetailsActivity" />
+        <activity android:name=".ui.MainActivity" />
+        <activity android:name=".ui.auth.RegistrationActivity" />
+        <activity android:name=".ui.events.AddEventActivity" />
+        <activity android:name=".ui.events.EventDetailsActivity" />
 
     </application>
 
