@@ -1,14 +1,19 @@
 package com.example.unitime.db.events
 
 import com.example.unitime.db.tags.Tag
+import com.example.unitime.utils.toEvents
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class EventRepository(
     private val eventsDao: EventsDao,
     private val tagDao: TagDao
 ) {
-    fun observeUpcoming(): Flow<List<EventWithTags>> =
-        eventsDao.observeUpcomingWithTags()
+    fun observeUpcoming(
+        now: Long = System.currentTimeMillis()
+    ): Flow<List<Event>> = eventsDao.observeUpcoming(now).map { it.toEvents() }
+
+    fun observeAll(): Flow<List<Event>> = eventsDao.observeAll().map { it.toEvents() }
 
     fun observeByTag(tagId: Long): Flow<List<EventWithTags>> =
         eventsDao.observeByTag(tagId)
