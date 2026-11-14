@@ -67,7 +67,8 @@ class MainActivity : AppCompatActivity() {
         lateinit var adapter: EventAdapter
         adapter = EventAdapter(
             onEventClick = { event ->
-                // TODO: открытие деталей события
+                val intent = EventDetailsActivity.newIntent(this, event)
+                startActivity(intent)
             },
             onJoinClick = { event ->
                 lifecycleScope.launch {
