@@ -9,11 +9,11 @@ import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.room.Update
-import com.example.unitime.Event
-import com.example.unitime.EventParticipant
+import com.example.unitime.data.local.model.Event
+import com.example.unitime.data.local.model.EventParticipant
 import com.example.unitime.data.local.dao.EventParticipantDao
-import com.example.unitime.EventTagCrossRef
-import com.example.unitime.EventWithTags
+import com.example.unitime.data.local.model.EventTagCrossRef
+import com.example.unitime.data.local.model.EventWithTags
 import com.example.unitime.data.local.model.Tag
 import kotlinx.coroutines.flow.Flow
 

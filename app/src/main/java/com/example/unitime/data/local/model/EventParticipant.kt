@@ -13,17 +13,17 @@ import androidx.room.Index
             entity = Event::class,
             parentColumns = [Event.ID_COLUMN],
             childColumns = ["event_id"],
-            _root_ide_package_.com.example.unitime.data.local.model.Event = _root_ide_package_.androidx.room.ForeignKey.Companion.CASCADE
+            onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
-        _root_ide_package_.androidx.room.Index(value = ["user_id"])
+        Index(value = ["user_id"])
     ]
 )
 data class EventParticipant(
-    @androidx.room.ColumnInfo(name = "event_id")
-    val eventId: kotlin.Long,
+    @ColumnInfo(name = "event_id")
+    val eventId: Long,
 
-    @androidx.room.ColumnInfo(name = "user_id")
-    val userId: kotlin.Long
+    @ColumnInfo(name = "user_id")
+    val userId: Long
 )

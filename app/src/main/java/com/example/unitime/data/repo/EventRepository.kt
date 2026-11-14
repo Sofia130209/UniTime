@@ -2,6 +2,7 @@ package com.example.unitime.data.repo
 
 import com.example.unitime.data.local.db.tags.DefaultTags
 import com.example.unitime.data.local.model.Tag
+import com.example.unitime.data.local.model.Event
 import com.example.unitime.data.local.db.events.EventsDao
 import com.example.unitime.data.local.db.events.TagDao
 import com.example.unitime.data.mapper.toEvents

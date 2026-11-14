@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.unitime.R
+import com.example.unitime.data.local.model.Event
 import com.example.unitime.data.local.db.auth.UsersDbProvider
 import com.example.unitime.data.local.db.events.EventsDbProvider
 import com.example.unitime.data.managers.SessionManager
