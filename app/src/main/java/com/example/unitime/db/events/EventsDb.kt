@@ -16,13 +16,15 @@ import com.example.unitime.db.tags.Tag
     entities = [
         Event::class,
         EventTagCrossRef::class,
-        Tag::class
+        Tag::class,
+        EventParticipant::class
     ],
-    version = 4
+    version = 5
 )
 abstract class EventsDb : RoomDatabase() {
     abstract fun getEventsDao(): EventsDao
     abstract fun getTagDao(): TagDao
+    abstract fun getEventParticipantDao(): EventParticipantDao
 }
 
 @Dao

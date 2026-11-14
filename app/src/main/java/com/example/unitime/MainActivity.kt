@@ -1,3 +1,4 @@
+
 package com.example.unitime
 
 import android.content.Intent
@@ -10,11 +11,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.unitime.db.auth.UsersDbProvider
+import com.example.unitime.db.events.Event
+import com.example.unitime.db.events.EventParticipantRepository
 import com.example.unitime.db.events.EventRepository
 import com.example.unitime.db.events.EventsDbProvider
+import com.example.unitime.db.events.JoinResult
 import com.example.unitime.utils.SessionManager
-import com.example.unitime.utils.toEvents
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -39,29 +44,145 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(this, AddEventActivity::class.java))
         }
 
-        // RecyclerView
-        val recycler = findViewById<RecyclerView>(R.id.activitiesRecyclerView)
-        val adapter = EventAdapter { event ->
-            // TODO: открыть экран деталей события
-        }
-
-        recycler.layoutManager = LinearLayoutManager(this)
-        recycler.adapter = adapter
-
-        // База данных и репозиторий
+        // База данных и репозитории
         val db = EventsDbProvider.get(this)
 
         val repository = EventRepository(
             db.getEventsDao(),
             db.getTagDao()
         )
+
+        val usersDb = UsersDbProvider.get(this)
+
+        val participantRepository = EventParticipantRepository(
+            db.getEventParticipantDao(),
+            usersDb.getUsersDao()
+        )
+
+        val userLogin = session.userLogin
+
+        // RecyclerView
+        val recycler = findViewById<RecyclerView>(R.id.activitiesRecyclerView)
+
+        lateinit var adapter: EventAdapter
+        adapter = EventAdapter(
+            onEventClick = { event ->
+                // TODO: открытие деталей события
+            },
+            onJoinClick = { event ->
+                lifecycleScope.launch {
+                    val login = userLogin
+
+                    if (login == null) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Не удалось определить пользователя",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@launch
+                    }
+
+                    if (adapter.isJoined(event.id)) {
+
+                        // Отмена записи
+                        participantRepository.leaveEvent(event.id, login)
+                        adapter.markNotJoined(event.id)
+
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Вы отменили запись",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                    } else {
+
+                        // Запись на мероприятие
+                        when (participantRepository.joinEvent(event.id, login)) {
+
+                            JoinResult.SUCCESS -> {
+                                adapter.markJoined(event.id)
+
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Вы записались на мероприятие!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                            JoinResult.ALREADY_JOINED -> {
+                                adapter.markJoined(event.id)
+
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Вы уже записаны",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                            JoinResult.FULL -> {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Свободных мест больше нет",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                            JoinResult.USER_NOT_FOUND -> {
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "Пользователь не найден",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    }
+                }
+            }
+        )
+
+        recycler.layoutManager = LinearLayoutManager(this)
+        recycler.adapter = adapter
+
+        // Подписки на изменения участников
+        val participantJobs = mutableListOf<Job>()
+
+        fun observeParticipantStates(events: List<Event>) {
+            participantJobs.forEach { it.cancel() }
+            participantJobs.clear()
+
+            events.forEach { event ->
+
+                // Количество участников
+                participantJobs.add(
+                    lifecycleScope.launch {
+                        participantRepository
+                            .observeParticipantCount(event.id)
+                            .collect { count ->
+                                adapter.updateParticipantCount(event.id, count)
+                            }
+                    }
+                )
+
+                // Проверка записи текущего пользователя
+                participantJobs.add(
+                    lifecycleScope.launch {
+                        val login = userLogin ?: return@launch
+
+                        if (participantRepository.hasJoined(event.id, login)) {
+                            adapter.markJoined(event.id)
+                        }
+                    }
+                )
+            }
+        }
+
         lifecycleScope.launch {
             repository.ensureDefaultTags()
         }
 
         val emptyView = findViewById<View>(R.id.emptyView)
 
-        // Job для управления текущей подпиской на события
+        // Управление подпиской на события
         var eventsJob: Job? = null
 
         // Отображение всех предстоящих событий
@@ -70,7 +191,9 @@ class MainActivity : AppCompatActivity() {
 
             eventsJob = lifecycleScope.launch {
                 repository.observeUpcoming().collect { events ->
-                    adapter.submitList(events)
+                    adapter.submitList(events) {
+                        observeParticipantStates(events)
+                    }
 
                     emptyView.visibility =
                         if (events.isEmpty()) View.VISIBLE else View.GONE
@@ -85,20 +208,18 @@ class MainActivity : AppCompatActivity() {
             eventsJob = lifecycleScope.launch {
                 val tagId = repository.findTagIdByName(tagName)
 
-                Toast.makeText(
-                    this@MainActivity,
-                    "Тег: $tagName, ID: $tagId",
-                    Toast.LENGTH_LONG
-                ).show()
-
                 if (tagId == null) {
-                    adapter.submitList(emptyList())
+                    adapter.submitList(emptyList()) {
+                        observeParticipantStates(emptyList())
+                    }
                     emptyView.visibility = View.VISIBLE
                     return@launch
                 }
 
                 repository.observeByTag(tagId).collect { events ->
-                    adapter.submitList(events)
+                    adapter.submitList(events) {
+                        observeParticipantStates(events)
+                    }
 
                     emptyView.visibility =
                         if (events.isEmpty()) View.VISIBLE else View.GONE
