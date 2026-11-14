@@ -68,15 +68,8 @@ class EventAdapter(
         holder.joinButton.text =
             if (isJoined) "Отменить запись" else "Присоединиться"
 
-        holder.joinButton.isEnabled =
-            isJoined || count < event.activityParticipants
-
-        holder.joinButton.setOnClickListener {
-            onJoinClick(event)
-        }
-
-        holder.joinButton.isEnabled = !isJoined &&
-                count < event.activityParticipants
+        holder.joinButton.isEnabled = true
+        holder.joinButton.isClickable = true
 
         holder.joinButton.setOnClickListener {
             onJoinClick(event)
