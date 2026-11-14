@@ -13,12 +13,22 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.unitime.db.events.EventRepository
 import com.example.unitime.db.events.EventsDbProvider
+import com.example.unitime.utils.SessionManager
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // * защита от входа без авторизации: если сессии нет — сразу на экран входа.
+        // * Раньше при крахе MainActivity система пересоздавала стек и показывался
+        // * экран регистрации/входа; теперь это единственная легальная причина возврата туда.
+        if (!SessionManager(this).isLoggedIn) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
 
         setContentView(R.layout.activity_main)
 

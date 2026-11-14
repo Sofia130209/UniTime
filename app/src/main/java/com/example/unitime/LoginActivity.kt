@@ -19,14 +19,8 @@ class LoginActivity : ComponentActivity() {
 
         setContentView(R.layout.log_activity)
 
-        // * для последующего использования чекбокса "Запомнить меня"
-        val sessionManager = SessionManager(this)
-        if (sessionManager.isLoggedIn) {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-
-            finish()
-        }
+        // * проверку сессии делает SplashActivity (точка входа в приложении),
+        // * поэтому сюда попадаем только когда вход действительно нужен
 
         val db = UsersDbProvider.get(this)
 
