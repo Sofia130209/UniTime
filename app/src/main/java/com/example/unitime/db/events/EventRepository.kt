@@ -11,7 +11,9 @@ class EventRepository(
 ) {
     fun observeUpcoming(
         now: Long = System.currentTimeMillis()
-    ): Flow<List<Event>> = eventsDao.observeUpcoming(now).map { it.toEvents() }
+    ): Flow<List<Event>> = eventsDao.observeUpcoming(now).map { list ->
+        emptyList()
+    }
 
     fun observeAll(): Flow<List<Event>> = eventsDao.observeAll().map { it.toEvents() }
 

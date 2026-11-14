@@ -64,8 +64,8 @@ class AddEventActivity : AppCompatActivity() {
 
     private fun setupSpinner() {
         val categories = listOf(
-            "Sport", "Music", "Study", "Food",
-            "Gaming", "Art", "Volunteering", "Other"
+            "Спорт", "Музыка", "Учёба", "Еда",
+            "Игры", "Искусство", "Волонтёрство", "Другое"
         )
         categorySpinner.adapter = ArrayAdapter(
             this,

@@ -13,7 +13,10 @@ import java.util.Date
 import java.util.Locale
 
 class EventAdapter(private val onEventClick: (Event) -> Unit) : ListAdapter<Event, EventAdapter.EventViewHolder>(Diff) {
-    private val dateFormatter = SimpleDateFormat("d MMM, HH:mm", Locale.getDefault())
+    private val dateFormatter = SimpleDateFormat(
+        "EEEE, dd MMMM, HH:mm",
+        Locale.getDefault()
+    )
 
     class EventViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val title: TextView = view.findViewById<TextView>(R.id.activityTitle)
@@ -42,7 +45,7 @@ class EventAdapter(private val onEventClick: (Event) -> Unit) : ListAdapter<Even
         holder.date.text = dateFormatter.format(Date(event.activityDate))
         holder.location.text = event.activityLocation
         holder.tag.text = event.activityCategory
-        holder.participants.text = event.activityParticipants.toString()
+        holder.participants.text = "Допустимое количество участников: ${event.activityParticipants}"
 
         holder.itemView.setOnClickListener {
             onEventClick(event)
