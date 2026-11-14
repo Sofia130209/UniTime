@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.unitime.db.auth.User
 import com.example.unitime.db.auth.UsersDbProvider
 import com.example.unitime.db.auth.saveImageToInternalStorage
+import com.example.unitime.utils.SessionManager
 import com.example.unitime.utils.UserManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -86,11 +87,17 @@ class RegistrationActivity : ComponentActivity() {
 
                 val isReg = userManager.regUser(user)
                 if (isReg) {
-                    val intent = Intent(this@RegistrationActivity, LoginActivity::class.java)
+                    // * раз пользователь зарегистрировался и данные у него заведомо верные —
+                    // * сразу сохраняем сессию, чтобы главный экран открылся без повторного входа
+                    SessionManager(this@RegistrationActivity).saveSession(login)
+
+                    val intent = Intent(this@RegistrationActivity, MainActivity::class.java)
                     startActivity(intent)
+
+                    finish()
                 }
                 else {
-                    Toast.makeText(this@RegistrationActivity, "not nice", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@RegistrationActivity, "Такой логин уже занят", Toast.LENGTH_LONG).show()
                 }
             }
         }

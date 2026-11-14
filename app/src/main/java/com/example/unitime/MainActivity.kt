@@ -11,14 +11,24 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.unitime.db.events.Event
+import com.example.unitime.db.events.EventRepository
 import com.example.unitime.db.events.EventsDbProvider
+import com.example.unitime.utils.SessionManager
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // * защита от входа без авторизации: если сессии нет — сразу на экран входа.
+        // * Раньше при крахе MainActivity система пересоздавала стек и показывался
+        // * экран регистрации/входа; теперь это единственная легальная причина возврата туда.
+        if (!SessionManager(this).isLoggedIn) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
 
         setContentView(R.layout.activity_main)
 
@@ -38,11 +48,12 @@ class MainActivity : AppCompatActivity() {
         recycler.adapter = adapter
 
         val db = EventsDbProvider.get(this)
+        val repository = EventRepository(db.getEventsDao(), db.getTagDao())
         lifecycleScope.launch {
-            db.getEventsDao()
-                .observeUpcoming()
+            // * Repository возвращает уже готовый Flow<List<Event>> — никаких кастов
+            repository.observeUpcoming()
                 .collect { events ->
-                    adapter.submitList(events as List<Event?>?)
+                    adapter.submitList(events)
                     emptyView.visibility =
                         if (events.isEmpty()) View.VISIBLE else View.GONE
                 }
