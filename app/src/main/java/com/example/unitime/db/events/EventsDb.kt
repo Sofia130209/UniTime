@@ -50,13 +50,17 @@ interface EventsDao {
     // * «активности с конкретным тегом»
     @Transaction
     @Query("""
-        SELECT e.* FROM ${Event.TABLE_NAME} e
-        INNER JOIN ${EventTagCrossRef.TABLE_NAME} r
-            ON r.${EventTagCrossRef.EVENT_ID_COLUMN} = e.${Event.ID_COLUMN}
-        WHERE r.${EventTagCrossRef.TAG_ID_COLUMN} = :tagId
-        ORDER BY e.${Event.ACTIVITY_DATE} ASC
+    SELECT e.* FROM ${Event.TABLE_NAME} e
+    INNER JOIN ${EventTagCrossRef.TABLE_NAME} r
+        ON r.${EventTagCrossRef.EVENT_ID_COLUMN} = e.${Event.ID_COLUMN}
+    WHERE r.${EventTagCrossRef.TAG_ID_COLUMN} = :tagId
+        AND e.${Event.ACTIVITY_DATE} >= :now
+    ORDER BY e.${Event.ACTIVITY_DATE} ASC
     """)
-    fun observeByTag(tagId: Long): Flow<List<EventWithTags>>
+    fun observeByTag(
+        tagId: Long,
+        now: Long = System.currentTimeMillis()
+    ): Flow<List<EventWithTags>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertCrossRefs(refs: List<EventTagCrossRef>)
@@ -101,7 +105,7 @@ interface TagDao {
     suspend fun insert(tag: Tag): Long // * вернёт -1, если такой name уже есть
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAll(tags: List<Tag>): List<Long>
+    suspend fun insertAll(tags: List<Tag>)
 
     @Query("SELECT * FROM ${Tag.TABLE_NAME} WHERE ${Tag.NAME_COLUMN} = :name LIMIT 1")
     suspend fun findByName(name: String): Tag?

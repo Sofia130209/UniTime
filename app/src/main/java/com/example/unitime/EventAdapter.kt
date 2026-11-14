@@ -1,5 +1,6 @@
 package com.example.unitime
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +36,7 @@ class EventAdapter(private val onEventClick: (Event) -> Unit) : ListAdapter<Even
         return EventViewHolder(view)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(
         holder: EventViewHolder,
         position: Int

@@ -15,10 +15,7 @@ object EventsDbProvider {
                 EventsDb::class.java,
                 "events_database"
             )
-                .fallbackToDestructiveMigration()
-                .addCallback(
-                    PrepopulateTagsCallback(context.applicationContext)
-                )
+                .addCallback(PrepopulateTagsCallback(context.applicationContext))
                 .build()
                 .also { instance = it }
         }

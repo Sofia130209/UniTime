@@ -23,6 +23,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import com.example.unitime.db.events.EventRepository
 
 class AddEventActivity : AppCompatActivity() {
 
@@ -126,21 +127,38 @@ class AddEventActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                EventsDbProvider.get(applicationContext)
-                    .getEventsDao()
-                    .insert(
-                        Event(
-                            activityTitle = title,
-                            activityDescription = description,
-                            activityCategory = category,
-                            activityDate = millis,
-                            activityLocation = location,
-                            activityParticipants = maxParticipants
-                        )
-                    )
-                Toast.makeText(this@AddEventActivity, "Активность создана", Toast.LENGTH_SHORT).show()
+                val db = EventsDbProvider.get(applicationContext)
 
-                val intent = Intent(this@AddEventActivity, MainActivity::class.java)
+                val repository = EventRepository(
+                    db.getEventsDao(),
+                    db.getTagDao()
+                )
+
+                val event = Event(
+                    activityTitle = title,
+                    activityDescription = description,
+                    activityCategory = category,
+                    activityDate = millis,
+                    activityLocation = location,
+                    activityParticipants = maxParticipants
+                )
+
+                // Создаём событие вместе с его тегом
+                repository.createEvent(
+                    event = event,
+                    tagNames = listOf(category)
+                )
+
+                Toast.makeText(
+                    this@AddEventActivity,
+                    "Активность создана",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                val intent = Intent(
+                    this@AddEventActivity,
+                    MainActivity::class.java
+                )
                 startActivity(intent)
             } catch (e: Exception) {
                 isSaving = false

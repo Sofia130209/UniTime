@@ -1,5 +1,6 @@
 package com.example.unitime.db.events
 
+import com.example.unitime.db.tags.DefaultTags
 import com.example.unitime.db.tags.Tag
 import com.example.unitime.utils.toEvents
 import kotlinx.coroutines.flow.Flow
@@ -9,16 +10,27 @@ class EventRepository(
     private val eventsDao: EventsDao,
     private val tagDao: TagDao
 ) {
+    suspend fun ensureDefaultTags() {
+        tagDao.insertAll(
+            DefaultTags.ALL.map { name ->
+                Tag(name = name)
+            }
+        )
+    }
     fun observeUpcoming(
         now: Long = System.currentTimeMillis()
-    ): Flow<List<Event>> = eventsDao.observeUpcoming(now).map { list ->
-        emptyList()
-    }
+    ): Flow<List<Event>> =
+        eventsDao.observeUpcoming(now).map { it.toEvents() }
 
     fun observeAll(): Flow<List<Event>> = eventsDao.observeAll().map { it.toEvents() }
 
-    fun observeByTag(tagId: Long): Flow<List<EventWithTags>> =
-        eventsDao.observeByTag(tagId)
+    fun observeByTag(
+        tagId: Long
+    ): Flow<List<Event>> =
+        eventsDao.observeByTag(tagId).map { it.toEvents() }
+
+    suspend fun findTagIdByName(name: String): Long? =
+        tagDao.findByName(name.trim().lowercase())?.id
 
     fun observeAllTags(): Flow<List<Tag>> = tagDao.observeAll()
 
