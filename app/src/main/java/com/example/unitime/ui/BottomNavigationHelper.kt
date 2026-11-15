@@ -24,6 +24,12 @@ object BottomNavigationHelper {
                     activity.startActivity(
                         Intent(activity, MainActivity::class.java)
                     )
+
+                    activity.overridePendingTransition(
+                        R.anim.slide_to_right,
+                        R.anim.slide_to_left
+                    )
+
                     true
                 }
 
@@ -31,6 +37,12 @@ object BottomNavigationHelper {
                     activity.startActivity(
                         Intent(activity, ProfileActivity::class.java)
                     )
+
+                    activity.overridePendingTransition(
+                        R.anim.slide_to_right,
+                        R.anim.slide_to_left
+                    )
+
                     true
                 }
 
