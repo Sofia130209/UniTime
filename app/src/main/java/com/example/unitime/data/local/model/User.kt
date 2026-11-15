@@ -11,6 +11,9 @@ import androidx.room.PrimaryKey
 )
 data class User(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = ID_COLUMN) val id: Long = 0,
+    @ColumnInfo(name = NAME_COLUMN) val name: String,
+    @ColumnInfo(name = SURNAME_COLUMN) val surname: String,
+    @ColumnInfo(name = EMAIL_COLUMN) val email: String,
     @ColumnInfo(name = LOGIN_COLUMN) val login: String,
     @ColumnInfo(name = PASSWORD_HASH_COLUMN) val password: String,
     @ColumnInfo(name = AVATAR_COLUMN) val avatarPath: String? = null
@@ -20,6 +23,9 @@ data class User(
         const val TABLE_NAME = "users"
         const val ID_COLUMN = "id"
         const val LOGIN_COLUMN = "login"
+        const val NAME_COLUMN = "name"
+        const val SURNAME_COLUMN = "surname"
+        const val EMAIL_COLUMN = "email"
         const val PASSWORD_HASH_COLUMN = "password_hash"
         const val AVATAR_COLUMN = "avatar"
     }

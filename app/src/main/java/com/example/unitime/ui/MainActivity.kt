@@ -2,6 +2,7 @@ package com.example.unitime.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
@@ -19,14 +20,15 @@ import com.example.unitime.data.repo.EventParticipantRepository
 import com.example.unitime.data.repo.EventRepository
 import com.example.unitime.data.repo.JoinResult
 import com.example.unitime.ui.auth.LoginActivity
+import com.example.unitime.ui.auth.ProfileActivity
 import com.example.unitime.ui.events.AddEventActivity
 import com.example.unitime.ui.events.EventAdapter
 import com.example.unitime.ui.events.EventDetailsActivity
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -41,6 +43,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_main)
+
+        BottomNavigationHelper.setup(this, R.id.nav_home)
 
         // Кнопка создания события
         findViewById<Button>(R.id.createActivityButton).setOnClickListener {
@@ -270,5 +274,7 @@ class MainActivity : AppCompatActivity() {
 
         // Первоначальная загрузка
         showAllEvents()
+
+
     }
 }

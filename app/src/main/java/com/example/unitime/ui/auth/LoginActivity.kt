@@ -19,12 +19,6 @@ class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Toast.makeText(
-            this,
-            "LoginActivity запущена",
-            Toast.LENGTH_LONG
-        ).show()
-
         setContentView(R.layout.log_activity)
 
         val db = UsersDbProvider.get(this)
@@ -51,26 +45,14 @@ class LoginActivity : ComponentActivity() {
             else {
                 val userManager = UserManager(db)
 
-                val user = User(
-                    login = login,
-                    password = password
-                )
-
                 lifecycleScope.launch {
-                    val isLoggedIn = userManager.logUser(user)
+                    val isLoggedIn = userManager.logUser(login, password)
 
                     if (isLoggedIn) {
-                        // * сохраняем сессию, чтобы при повторном запуске сразу открывался главный экран
                         SessionManager(this@LoginActivity).saveSession(login)
 
                         val session = SessionManager(this@LoginActivity)
                         session.saveSession(login)
-
-                        Toast.makeText(
-                            this@LoginActivity,
-                            "Сессия сохранена: ${session.isLoggedIn}",
-                            Toast.LENGTH_LONG
-                        ).show()
 
                         val intent = Intent(this@LoginActivity, MainActivity::class.java)
                         startActivity(intent)

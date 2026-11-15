@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class RegistrationActivity : ComponentActivity() {
-
     private var selectedImage: Uri? = null
     private lateinit var avatarField: ImageView
 
@@ -51,7 +50,10 @@ class RegistrationActivity : ComponentActivity() {
         val db = UsersDbProvider.get(this)
 
         avatarField = findViewById(R.id.imageViewAvatar)
-        val loginField = findViewById<EditText>(R.id.editTextName)
+        val loginField = findViewById<EditText>(R.id.editTextLogin)
+        val nameField = findViewById<EditText>(R.id.editTextName)
+        val surnameField = findViewById<EditText>(R.id.editTextSurname)
+        val emailField = findViewById<EditText>(R.id.editTextEmail)
         val passwordField = findViewById<EditText>(R.id.editTextPass)
         val btnReg = findViewById<Button>(R.id.btnRegister)
 
@@ -63,9 +65,12 @@ class RegistrationActivity : ComponentActivity() {
 
         btnReg.setOnClickListener {
             val login = loginField.text.toString().trim()
+            val name = nameField.text.toString().trim()
+            val surname = surnameField.text.toString().trim()
+            val email = emailField.text.toString().trim()
             val password = passwordField.text.toString().trim()
 
-            if (login.isEmpty() || password.isEmpty()) {
+            if (login.isEmpty() || password.isEmpty() || name.isEmpty() || surname.isEmpty()) {
                 Toast.makeText(this, "Все поля должны быть заполнены", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
             }
@@ -83,14 +88,15 @@ class RegistrationActivity : ComponentActivity() {
 
                 val user = User(
                     login = login,
+                    name = name,
+                    surname = surname,
+                    email = email,
                     password = password,
                     avatarPath = savedPath
                 )
 
                 val isReg = userManager.regUser(user)
                 if (isReg) {
-                    // * раз пользователь зарегистрировался и данные у него заведомо верные —
-                    // * сразу сохраняем сессию, чтобы главный экран открылся без повторного входа
                     SessionManager(this@RegistrationActivity).saveSession(login)
 
                     val intent = Intent(this@RegistrationActivity, MainActivity::class.java)

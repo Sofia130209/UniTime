@@ -33,9 +33,9 @@ class UserManager(private val usersDb: UsersDb) {
         return@withContext resId >= 0L
     }
     // * лог
-    suspend fun logUser(user: User): Boolean = withContext(Dispatchers.IO) {
-        val passHash = hashPassword(user.password)
-        val foundUser = usersDao.checkUser(user.login, passHash)
+    suspend fun logUser(login: String, password: String): Boolean = withContext(Dispatchers.IO) {
+        val passHash = hashPassword(password)
+        val foundUser = usersDao.checkUser(login, passHash)
 
         return@withContext foundUser != null
     }

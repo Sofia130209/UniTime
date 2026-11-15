@@ -15,8 +15,6 @@ class SessionManager(context: Context) {
         set(value) = prefs.edit { putString("user_login", value).apply() }
 
     fun saveSession(login: String) {
-        // * commit() вместо apply(): запись гарантированно успевает сохраниться на диск
-        // * до того, как откроется главный экран (apply() пишет асинхронно и мог потерять сессию)
         prefs.edit(commit = true) { putBoolean("is_logged_in", true).putString("user_login", login) }
     }
 

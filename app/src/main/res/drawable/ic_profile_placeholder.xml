@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Фон -->
+    <path
+        android:fillColor="#E9EAFE"
+        android:pathData="M60,0 A60,60 0,1 0,60 120 A60,60 0,1 0,60 0 Z" />
+
+    <!-- Голова -->
+    <path
+        android:fillColor="#5967B2"
+        android:pathData="M60,28 A16,16 0,1 0,60 60 A16,16 0,1 0,60 28 Z" />
+
+    <!-- Плечи и туловище -->
+    <path
+        android:fillColor="#5967B2"
+        android:pathData="M60,67 C39,67 25,80 25,101 L25,108 L95,108 L95,101 C95,80 81,67 60,67 Z" />
+
+</vector>
