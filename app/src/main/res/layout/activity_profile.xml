@@ -45,15 +45,24 @@
                     android:gravity="center"
                     android:padding="24dp">
 
-                    <ImageView
-                        android:id="@+id/profileAvatar"
+                    <com.google.android.material.card.MaterialCardView
                         android:layout_width="104dp"
                         android:layout_height="104dp"
-                        android:src="@drawable/ic_profile_placeholder"
-                        android:scaleType="centerCrop"
-                        android:background="#E9EAFE"
-                        android:contentDescription="Аватар пользователя"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="16dp"
+                        app:cardCornerRadius="52dp"
+                        app:cardElevation="0dp"
+                        app:strokeWidth="0dp"
+                        app:cardBackgroundColor="#E9EAFE">
+
+                        <ImageView
+                            android:id="@+id/profileAvatar"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:src="@drawable/ic_profile_placeholder"
+                            android:scaleType="centerCrop"
+                            android:contentDescription="Аватар пользователя" />
+
+                    </com.google.android.material.card.MaterialCardView>
 
                     <TextView
                         android:id="@+id/profileName"

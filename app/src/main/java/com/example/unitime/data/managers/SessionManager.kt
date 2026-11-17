@@ -12,13 +12,20 @@ class SessionManager(context: Context) {
 
     var userLogin: String?
         get() = prefs.getString("user_login", null)
-        set(value) = prefs.edit { putString("user_login", value).apply() }
+        set(value) = prefs.edit { putString("user_login", value) }   // .apply() убран
+
+    var avatarPath: String?
+        get() = prefs.getString("avatar_path", null)
+        set(value) = prefs.edit { putString("avatar_path", value) }
 
     fun saveSession(login: String) {
-        prefs.edit(commit = true) { putBoolean("is_logged_in", true).putString("user_login", login) }
+        prefs.edit(commit = true) {
+            putBoolean("is_logged_in", true)
+            putString("user_login", login)
+        }
     }
 
     fun clear() {
-        prefs.edit { clear().apply() }
+        prefs.edit { clear() }
     }
 }
