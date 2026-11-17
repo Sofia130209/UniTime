@@ -1,27 +1,39 @@
+
 package com.example.unitime.ui.auth
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import coil.transform.CircleCropTransformation
 import com.example.unitime.R
 import com.example.unitime.data.local.db.auth.UsersDbProvider
+import com.example.unitime.data.local.db.events.EventsDbProvider
 import com.example.unitime.data.managers.SessionManager
 import com.example.unitime.ui.BottomNavigationHelper
-import kotlinx.coroutines.launch
-import java.io.File
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.example.unitime.ui.events.ProfileEventsAdapter
-import com.example.unitime.data.local.db.events.EventsDbProvider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 class ProfileActivity : ComponentActivity() {
+
+    private lateinit var session: SessionManager
+
+    private lateinit var avatarField: ImageView
+    private lateinit var nameText: TextView
+    private lateinit var loginText: TextView
+    private lateinit var emailText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,9 +42,79 @@ class ProfileActivity : ComponentActivity() {
 
         BottomNavigationHelper.setup(this, R.id.nav_profile)
 
-        val session = SessionManager(this)
+        session = SessionManager(this)
+
+        avatarField = findViewById(R.id.profileAvatar)
+        nameText = findViewById(R.id.profileName)
+        loginText = findViewById(R.id.profileLogin)
+        emailText = findViewById(R.id.profileEmail)
+
         val login = session.userLogin
 
+        if (login == null) {
+            Toast.makeText(
+                this,
+                "Пользователь не авторизован",
+                Toast.LENGTH_SHORT
+            ).show()
+            finish()
+            return
+        }
+
+        setupEvents(login)
+        setupButtons()
+    }
+
+    // Обновляем данные при каждом возвращении на экран
+    override fun onResume() {
+        super.onResume()
+        loadUserData()
+    }
+
+    // Загрузка актуальной информации о пользователе
+    private fun loadUserData() {
+        val login = session.userLogin ?: return
+
+        lifecycleScope.launch {
+            val user = withContext(Dispatchers.IO) {
+                UsersDbProvider.get(applicationContext)
+                    .getUsersDao()
+                    .getUserByLogin(login)
+            }
+
+            if (user != null) {
+                nameText.text = "${user.name} ${user.surname}"
+                loginText.text = "@${user.login}"
+                emailText.text = user.email
+
+                val avatarFile = user.avatarPath
+                    ?.let(::File)
+                    ?.takeIf { it.exists() }
+
+                if (avatarFile != null) {
+                    avatarField.load(avatarFile) {
+                        crossfade(true)
+                        placeholder(R.drawable.ic_profile_placeholder)
+                        error(R.drawable.ic_profile_placeholder)
+                        transformations(CircleCropTransformation())
+                    }
+                } else {
+                    avatarField.setImageResource(
+                        R.drawable.ic_profile_placeholder
+                    )
+                }
+            } else {
+                Toast.makeText(
+                    this@ProfileActivity,
+                    "Пользователь не найден",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    // Настройка мероприятий пользователя
+    private fun setupEvents(login: String) {
         val eventsRecycler =
             findViewById<RecyclerView>(R.id.profileEventsRecycler)
 
@@ -42,12 +124,13 @@ class ProfileActivity : ComponentActivity() {
         val createdCount =
             findViewById<TextView>(R.id.profileCreatedCount)
 
-        val eventsDb = EventsDbProvider.get(this)
-        val eventsDao = eventsDb.getEventsDao()
+        val eventsDao = EventsDbProvider
+            .get(this)
+            .getEventsDao()
 
         val adapter = ProfileEventsAdapter { event ->
 
-            androidx.appcompat.app.AlertDialog.Builder(this)
+            AlertDialog.Builder(this)
                 .setTitle("Удалить мероприятие?")
                 .setMessage(
                     "Вы действительно хотите удалить «${event.activityTitle}»? " +
@@ -57,8 +140,10 @@ class ProfileActivity : ComponentActivity() {
                 .setPositiveButton("Удалить") { _, _ ->
 
                     lifecycleScope.launch {
-                        eventsDao.deleteCrossRefsForEvent(event.id)
-                        eventsDao.delete(event)
+                        withContext(Dispatchers.IO) {
+                            eventsDao.deleteCrossRefsForEvent(event.id)
+                            eventsDao.delete(event)
+                        }
 
                         Toast.makeText(
                             this@ProfileActivity,
@@ -70,9 +155,7 @@ class ProfileActivity : ComponentActivity() {
                 .show()
         }
 
-        eventsRecycler.layoutManager =
-            LinearLayoutManager(this)
-
+        eventsRecycler.layoutManager = LinearLayoutManager(this)
         eventsRecycler.adapter = adapter
 
         lifecycleScope.launch {
@@ -83,62 +166,42 @@ class ProfileActivity : ComponentActivity() {
                 createdCount.text = events.size.toString()
 
                 emptyEventsText.visibility =
-                    if (events.isEmpty()) View.VISIBLE
-                    else View.GONE
+                    if (events.isEmpty()) View.VISIBLE else View.GONE
 
                 eventsRecycler.visibility =
-                    if (events.isEmpty()) View.GONE
-                    else View.VISIBLE
+                    if (events.isEmpty()) View.GONE else View.VISIBLE
             }
         }
+    }
 
-        val avatarField = findViewById<ImageView>(R.id.profileAvatar)
-        val nameText = findViewById<TextView>(R.id.profileName)
-        val loginText = findViewById<TextView>(R.id.profileLogin)
-        val emailText = findViewById<TextView>(R.id.profileEmail)
+    // Настройка кнопок профиля
+    private fun setupButtons() {
 
-        if (login == null) {
-            Toast.makeText(this, "Пользователь не авторизован", Toast.LENGTH_SHORT).show()
-            finish()
-            return
+        val btnEditProfile =
+            findViewById<Button>(R.id.editProfileButton)
+
+        btnEditProfile.setOnClickListener {
+            startActivity(
+                Intent(this, EditProfileActivity::class.java)
+            )
         }
 
-        val btnLogout = findViewById<TextView>(R.id.logoutButton)
+        val btnLogout =
+            findViewById<TextView>(R.id.logoutButton)
+
         btnLogout.setOnClickListener {
             session.clear()
 
-            val intent = Intent(this@ProfileActivity, LoginActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            val intent = Intent(
+                this,
+                LoginActivity::class.java
+            ).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
+
             startActivity(intent)
             finish()
-        }
-
-        val db = UsersDbProvider.get(this)
-        val usersDao = db.getUsersDao()
-
-        lifecycleScope.launch {
-            val user = usersDao.getUserByLogin(login)
-
-            if (user != null) {
-                nameText.text = "${user.name} ${user.surname}"
-                loginText.text = "@${user.login}"
-                emailText.text = user.email
-
-                val avatarFile = user.avatarPath?.let(::File)?.takeIf { it.exists() }
-                if (avatarFile != null) {
-                    avatarField.load(avatarFile) {
-                        crossfade(true)
-                        placeholder(R.drawable.ic_profile_placeholder)
-                        error(R.drawable.ic_profile_placeholder)
-                        transformations(CircleCropTransformation())
-                    }
-                } else {
-                    avatarField.setImageResource(R.drawable.ic_profile_placeholder)
-                }
-            } else {
-                Toast.makeText(this@ProfileActivity, "Пользователь не найден", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 }

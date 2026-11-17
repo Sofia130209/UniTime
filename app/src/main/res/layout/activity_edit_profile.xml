@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F8FC"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Редактирование профиля"
+            android:textColor="#252942"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Личные данные -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Личные данные"
+            android:textColor="#5967B2"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/editName"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:hint="Имя"
+            android:singleLine="true"
+            android:padding="14dp"
+            android:backgroundTint="#5967B2"/>
+
+        <EditText
+            android:id="@+id/editSurname"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:hint="Фамилия"
+            android:singleLine="true"
+            android:layout_marginTop="10dp"
+            android:padding="14dp"
+            android:backgroundTint="#5967B2"/>
+
+        <!-- Данные аккаунта -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Данные аккаунта"
+            android:textColor="#5967B2"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:layout_marginTop="26dp"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/editLogin"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:hint="Логин"
+            android:singleLine="true"
+            android:inputType="text"
+            android:padding="14dp"
+            android:backgroundTint="#5967B2"/>
+
+        <EditText
+            android:id="@+id/editEmail"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:hint="Email"
+            android:singleLine="true"
+            android:inputType="textEmailAddress"
+            android:layout_marginTop="10dp"
+            android:padding="14dp"
+            android:backgroundTint="#5967B2"/>
+
+        <!-- Пароль -->
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Изменение пароля"
+            android:textColor="#5967B2"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:layout_marginTop="26dp"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/editCurrentPassword"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:hint="Текущий пароль"
+            android:inputType="textPassword"
+            android:padding="14dp"
+            android:backgroundTint="#5967B2"/>
+
+        <EditText
+            android:id="@+id/editNewPassword"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:hint="Новый пароль"
+            android:inputType="textPassword"
+            android:layout_marginTop="10dp"
+            android:padding="14dp"
+            android:backgroundTint="#5967B2"/>
+
+        <EditText
+            android:id="@+id/editRepeatPassword"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:hint="Повторите новый пароль"
+            android:inputType="textPassword"
+            android:layout_marginTop="10dp"
+            android:padding="14dp"
+            android:backgroundTint="#5967B2"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/saveProfileButton"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:text="Сохранить изменения"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:layout_marginTop="28dp"
+            android:backgroundTint="#5967B2"/>
+
+    </LinearLayout>
+
+</ScrollView>
