@@ -5,95 +5,141 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="1dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="0dp"
     app:strokeColor="#E8E9EF"
     app:strokeWidth="1dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
-        <!-- Название и категория -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/contentLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnArrow"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <TextView
-                android:id="@+id/activityTitle"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Вечерний футбол"
-                android:textColor="#20243A"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/activityCategory"
-                android:layout_width="wrap_content"
+                <TextView
+                    android:id="@+id/activityTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="12dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:fontFamily="@font/geist_semibold"
+                    android:text="Футбольный матч"
+                    android:textColor="@color/color_font2"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:fontFamily="@font/geist_semibold"
+                    android:id="@+id/activityCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_category_badge"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="6dp"
+                    android:text="Спорт"
+                    android:textColor="@color/color_font1"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Спорт"
-                android:textColor="#5967B2"
-                android:textSize="13sp" />
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/calendar"
+                    app:tint="#3B66B0" />
+
+                <TextView
+                    android:fontFamily="@font/geist_medium"
+                    android:id="@+id/activityDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="15:00 - 11.02"
+                    android:textColor="@color/color_font1"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Место и Участники (в одной строке) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Локация -->
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/map_point"
+                    app:tint="#3B66B0" />
+
+                <TextView
+                    android:fontFamily="@font/geist_medium"
+                    android:id="@+id/activityLocation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="Стадион ВГУ"
+                    android:textColor="@color/color_font1"
+                    android:textSize="10sp" />
+
+                <!-- Иконка участников (с отступом от локации) -->
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginStart="20dp"
+                    android:src="@drawable/users"
+                    app:tint="#3B66B0" />
+
+                <TextView
+                    android:fontFamily="@font/geist_medium"
+                    android:id="@+id/activityParticipants"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="3 человека"
+                    android:textColor="@color/color_font1"
+                    android:textSize="10sp" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Дата и время -->
-        <TextView
-            android:id="@+id/activityDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="Сегодня, 18:00"
-            android:textColor="#777B8A"
-            android:textSize="14sp" />
+        <ImageView
+            android:id="@+id/btnArrow"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@drawable/arrow_round"
+            android:padding="12dp"
+            android:clickable="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Место -->
-        <TextView
-            android:id="@+id/activityLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Спортивная площадка ВГУ"
-            android:textColor="#777B8A"
-            android:textSize="14sp" />
-
-        <!-- Участники и удаление -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <TextView
-                android:id="@+id/activityParticipants"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="3 участника"
-                android:textColor="#555B70"
-                android:textSize="14sp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/deleteEventButton"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Удалить"
-                android:textAllCaps="false"
-                android:textSize="12sp"
-                android:textColor="#D95364"
-                android:backgroundTint="#FFF0F1"
-                app:cornerRadius="10dp"
-                app:strokeWidth="0dp" />
-
-        </LinearLayout>
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

@@ -33,7 +33,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)
-
+    implementation("androidx.core:core-splashscreen:1.0.1")
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)

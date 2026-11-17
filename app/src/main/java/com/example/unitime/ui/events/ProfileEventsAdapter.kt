@@ -36,8 +36,8 @@ class ProfileEventsAdapter(
         val participants: TextView =
             view.findViewById(R.id.activityParticipants)
 
-        val deleteButton: MaterialButton =
-            view.findViewById(R.id.deleteEventButton)
+        //val deleteButton: MaterialButton =
+            //view.findViewById(R.id.deleteEventButton)
     }
 
     override fun onCreateViewHolder(
@@ -67,11 +67,11 @@ class ProfileEventsAdapter(
         holder.location.text = event.activityLocation
 
         holder.participants.text =
-            "Необходимо ${event.activityParticipants} участников"
+            "${event.activityParticipants} участников"
 
-        holder.deleteButton.setOnClickListener {
-            onDeleteClick(event)
-        }
+        //holder.deleteButton.setOnClickListener {
+         //   onDeleteClick(event)
+        //}
     }
 
     override fun getItemCount(): Int = events.size

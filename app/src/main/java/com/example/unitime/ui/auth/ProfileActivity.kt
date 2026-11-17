@@ -21,6 +21,7 @@ import com.example.unitime.data.local.db.events.EventsDbProvider
 import com.example.unitime.data.managers.SessionManager
 import com.example.unitime.ui.BottomNavigationHelper
 import com.example.unitime.ui.events.ProfileEventsAdapter
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -65,10 +66,13 @@ class ProfileActivity : ComponentActivity() {
         setupButtons()
     }
 
-    // Обновляем данные при каждом возвращении на экран
     override fun onResume() {
         super.onResume()
-        loadUserData()
+        val nav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        nav.post {
+            BottomNavigationHelper.setup(this, R.id.nav_profile)
+        }
+        loadUserData()  // уже есть
     }
 
     // Загрузка актуальной информации о пользователе

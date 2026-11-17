@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,17 +31,18 @@ import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
-
+        val isLogged = getSharedPreferences("auth", MODE_PRIVATE)
+            .getBoolean("is_logged", false)
         enableEdgeToEdge()
-
         val session = SessionManager(this)
-
-        if (!session.isLoggedIn) {
+        if (!session.isLoggedIn) {                                 // ✅ 3. оставить только это
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
             return
         }
+
 
         setContentView(R.layout.activity_main)
 
@@ -276,5 +278,12 @@ class MainActivity : AppCompatActivity() {
         showAllEvents()
 
 
+    }
+    override fun onResume() {
+        super.onResume()
+        val nav = findViewById<BottomNavigationView>(R.id.bottomNavigation)
+        nav.post {
+            BottomNavigationHelper.setup(this, R.id.nav_home)
+        }
     }
 }

@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -34,7 +34,9 @@ class EventAdapter(
         val location: TextView = view.findViewById(R.id.activityLocation)
         val tag: TextView = view.findViewById(R.id.activityCategory)
         val participants: TextView = view.findViewById(R.id.activityParticipants)
-        val joinButton: Button = view.findViewById(R.id.joinActivityButton)
+
+        // ⭐ Изменили тип с Button на ImageView
+        val joinButton: ImageView = view.findViewById(R.id.joinButton)
     }
 
     override fun onCreateViewHolder(
@@ -60,15 +62,17 @@ class EventAdapter(
         holder.tag.text = event.activityCategory
 
         val count = participantCounts[event.id] ?: 0
-
-        holder.participants.text =
-            "$count из ${event.activityParticipants} участников"
+        holder.participants.text = "$count из ${event.activityParticipants}"
 
         val isJoined = joinedEvents.contains(event.id)
 
-        holder.joinButton.text =
-            if (isJoined) "Отменить запись" else "Присоединиться"
+        if (isJoined) {
+            holder.joinButton.setBackgroundResource(R.drawable.del)
+        } else {
+            holder.joinButton.setBackgroundResource(R.drawable.arrow_round)
+        }
 
+        // Кнопка всегда активна и кликабельна
         holder.joinButton.isEnabled = true
         holder.joinButton.isClickable = true
 

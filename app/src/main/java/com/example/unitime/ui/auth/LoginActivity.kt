@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.example.unitime.ui.MainActivity
 import com.example.unitime.R
@@ -16,6 +17,7 @@ import com.example.unitime.data.managers.UserManager
 import kotlinx.coroutines.launch
 
 class LoginActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

@@ -233,13 +233,17 @@
         </LinearLayout>
     </ScrollView>
 
-    <!-- Нижняя навигация -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
         app:menu="@menu/bottom_navigation_menu"
+        app:itemIconTint="@null"
+        app:labelVisibilityMode="unlabeled"
+        app:itemActiveIndicatorStyle="@null"
+        app:itemBackground="@android:color/transparent"
+        app:itemRippleColor="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
 </LinearLayout>

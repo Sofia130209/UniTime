@@ -12,6 +12,17 @@ object BottomNavigationHelper {
         val bottomNavigation =
             activity.findViewById<BottomNavigationView>(R.id.bottomNavigation)
 
+        // Сбрасываем слушатель, чтобы не копились
+        bottomNavigation.setOnItemSelectedListener(null)
+
+        // ⭐ Принудительно обновляем checked у всех пунктов меню
+        // (иначе при REORDER_TO_FRONT визуал не обновляется)
+        val menu = bottomNavigation.menu
+        for (i in 0 until menu.size()) {
+            val item = menu.getItem(i)
+            item.isChecked = (item.itemId == selectedItemId)
+        }
+
         bottomNavigation.selectedItemId = selectedItemId
 
         bottomNavigation.setOnItemSelectedListener { item ->
@@ -19,40 +30,21 @@ object BottomNavigationHelper {
                 return@setOnItemSelectedListener true
             }
 
-            when (item.itemId) {
-                R.id.nav_home -> {
-                    activity.startActivity(
-                        Intent(activity, MainActivity::class.java)
-                    )
-
-                    activity.overridePendingTransition(
-                        R.anim.slide_to_right,
-                        R.anim.slide_to_left
-                    )
-
-                    true
-                }
-
-                R.id.nav_profile -> {
-                    activity.startActivity(
-                        Intent(activity, ProfileActivity::class.java)
-                    )
-
-                    activity.overridePendingTransition(
-                        R.anim.slide_to_right,
-                        R.anim.slide_to_left
-                    )
-
-                    true
-                }
-
-                R.id.nav_activities -> {
-                    // Здесь позже добавим переход к моим активностям
-                    true
-                }
-
-                else -> false
+            val targetActivity = when (item.itemId) {
+                R.id.nav_home -> MainActivity::class.java
+                R.id.nav_profile -> ProfileActivity::class.java
+                R.id.nav_activities -> return@setOnItemSelectedListener true
+                else -> return@setOnItemSelectedListener false
             }
+
+            activity.startActivity(
+                Intent(activity, targetActivity).apply {
+                    addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+                }
+            )
+            activity.overridePendingTransition(0, 0)
+
+            true
         }
     }
 }
