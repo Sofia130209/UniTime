@@ -15,6 +15,7 @@ import com.example.unitime.ui.MainActivity
 import com.example.unitime.R
 import com.example.unitime.data.local.db.events.EventsDbProvider
 import com.example.unitime.data.local.model.Event
+import com.example.unitime.data.managers.SessionManager
 import com.example.unitime.data.repo.EventRepository
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -133,13 +134,17 @@ class AddEventActivity : AppCompatActivity() {
                     db.getTagDao()
                 )
 
+                val session = SessionManager(this@AddEventActivity)
+                val login = session.userLogin ?: ""
+
                 val event = Event(
                     activityTitle = title,
                     activityDescription = description,
                     activityCategory = category,
                     activityDate = millis,
                     activityLocation = location,
-                    activityParticipants = maxParticipants
+                    activityParticipants = maxParticipants,
+                    createdByLogin = login
                 )
 
                 // Создаём событие вместе с его тегом

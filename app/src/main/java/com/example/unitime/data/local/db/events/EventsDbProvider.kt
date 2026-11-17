@@ -11,25 +11,14 @@ object EventsDbProvider {
     @Volatile
     private var instance: EventsDb? = null
 
-    private val MIGRATION_4_5 = object : Migration(4, 5) {
+    val MIGRATION_5_6 = object : Migration(5, 6) {
         override fun migrate(db: SupportSQLiteDatabase) {
-
-            db.execSQL("""
-                CREATE TABLE IF NOT EXISTS event_participants (
-                    event_id INTEGER NOT NULL,
-                    user_id INTEGER NOT NULL,
-                    PRIMARY KEY(event_id, user_id),
-                    FOREIGN KEY(event_id)
-                        REFERENCES events(id)
-                        ON UPDATE NO ACTION
-                        ON DELETE CASCADE
-                )
-            """)
-
-            db.execSQL("""
-                CREATE INDEX IF NOT EXISTS index_event_participants_user_id
-                ON event_participants(user_id)
-            """)
+            db.execSQL(
+                """
+            ALTER TABLE events
+            ADD COLUMN created_by_login TEXT NOT NULL DEFAULT ''
+            """
+            )
         }
     }
 
@@ -40,7 +29,7 @@ object EventsDbProvider {
                 EventsDb::class.java,
                 "events_database"
             )
-                .addMigrations(MIGRATION_4_5)
+                .addMigrations(MIGRATION_5_6)
                 .addCallback(
                     PrepopulateTagsCallback(context.applicationContext)
                 )

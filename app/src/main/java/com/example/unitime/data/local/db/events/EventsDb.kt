@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.Flow
         Tag::class,
         EventParticipant::class
     ],
-    version = 5
+    version = 6
 )
 abstract class EventsDb : RoomDatabase() {
     abstract fun getEventsDao(): EventsDao
@@ -104,6 +104,13 @@ interface EventsDao {
     @Transaction
     @Query("SELECT * FROM ${Event.TABLE_NAME} ORDER BY ${Event.ACTIVITY_DATE} ASC")
     fun observeAll(): Flow<List<EventWithTags>>
+
+    @Query("""
+    SELECT * FROM ${Event.TABLE_NAME}
+    WHERE ${Event.CREATED_BY_LOGIN} = :login
+    ORDER BY ${Event.ACTIVITY_DATE} ASC
+""")
+    fun observeCreatedByUser(login: String?): Flow<List<Event>>
 }
 
 @Dao
