@@ -1,6 +1,7 @@
 package com.example.unitime.ui.auth
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
@@ -38,6 +39,17 @@ class ProfileActivity : ComponentActivity() {
             Toast.makeText(this, "Пользователь не авторизован", Toast.LENGTH_SHORT).show()
             finish()
             return
+        }
+
+        val btnLogout = findViewById<TextView>(R.id.logoutButton)
+        btnLogout.setOnClickListener {
+            session.clear()
+
+            val intent = Intent(this@ProfileActivity, LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            startActivity(intent)
+            finish()
         }
 
         val db = UsersDbProvider.get(this)
