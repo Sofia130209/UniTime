@@ -18,6 +18,7 @@ import com.example.unitime.data.local.db.auth.UsersDbProvider
 import com.example.unitime.data.local.db.events.EventsDbProvider
 import com.example.unitime.data.local.model.Event
 import com.example.unitime.data.managers.SessionManager
+import com.example.unitime.data.remote.RetrofitClient
 import com.example.unitime.data.repo.EventParticipantRepository
 import com.example.unitime.data.repo.EventRepository
 import com.example.unitime.data.repo.JoinResult
@@ -55,7 +56,30 @@ class MainActivity : AppCompatActivity() {
             finish()
             return
         }
+        // --- ТЕСТ СВЯЗИ С СЕРВЕРОМ ---
+        lifecycleScope.launch {
+            try {
+                // Делаем запрос к серверу
+                val users = RetrofitClient.api.getAllUsers()
 
+                // Если успешно, показываем сообщение
+                Toast.makeText(
+                    this@MainActivity,
+                    "Успех! Пользователей с сервера: ${users.size}",
+                    Toast.LENGTH_LONG
+                ).show()
+
+            } catch (e: Exception) {
+                // Если ошибка, показываем её текст
+                Toast.makeText(
+                    this@MainActivity,
+                    "Ошибка: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
+                e.printStackTrace() // Выведет подробности в Logcat
+            }
+        }
+        // -------------------------------
         enableEdgeToEdge()
         // 1. Сначала устанавливаем разметку!
         setContentView(R.layout.activity_main)
