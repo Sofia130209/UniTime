@@ -36,7 +36,7 @@
                     android:id="@+id/activityTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="12dp"
+                    android:layout_marginEnd="6dp"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:fontFamily="@font/geist_semibold"
@@ -78,8 +78,7 @@
                     android:layout_marginStart="10dp"
                     android:text="15:00 - 11.02"
                     android:textColor="@color/color_font1"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
+                    android:textSize="10sp" />
             </LinearLayout>
 
             <!-- Место и Участники (в одной строке) -->
@@ -130,10 +129,10 @@
         </LinearLayout>
 
         <ImageView
-            android:id="@+id/btnArrow"
+            android:id="@+id/deleteEventButton"
             android:layout_width="45dp"
             android:layout_height="45dp"
-            android:background="@drawable/arrow_round"
+            android:background="@drawable/del"
             android:padding="12dp"
             android:clickable="true"
             app:layout_constraintBottom_toBottomOf="parent"

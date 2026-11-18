@@ -1,27 +1,27 @@
 package com.example.unitime.ui
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.unitime.R
-import com.example.unitime.data.local.model.Event
 import com.example.unitime.data.local.db.auth.UsersDbProvider
 import com.example.unitime.data.local.db.events.EventsDbProvider
+import com.example.unitime.data.local.model.Event
 import com.example.unitime.data.managers.SessionManager
 import com.example.unitime.data.repo.EventParticipantRepository
 import com.example.unitime.data.repo.EventRepository
 import com.example.unitime.data.repo.JoinResult
 import com.example.unitime.ui.auth.LoginActivity
-import com.example.unitime.ui.auth.ProfileActivity
+import com.example.unitime.ui.categories.CategoriesActivity
 import com.example.unitime.ui.events.AddEventActivity
 import com.example.unitime.ui.events.EventAdapter
 import com.example.unitime.ui.events.EventDetailsActivity
@@ -30,30 +30,38 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+    private var filterByTagHandler: ((String) -> Unit)? = null
+    private var showAllEventsHandler: (() -> Unit)? = null
+
+    private val categoryLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val tag = result.data?.getStringExtra("tagName")
+            if (tag.isNullOrBlank()) {
+                showAllEventsHandler?.invoke()
+            } else {
+                filterByTagHandler?.invoke(tag)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
-        val isLogged = getSharedPreferences("auth", MODE_PRIVATE)
-            .getBoolean("is_logged", false)
-        enableEdgeToEdge()
         val session = SessionManager(this)
-        if (!session.isLoggedIn) {                                 // ✅ 3. оставить только это
+        if (!session.isLoggedIn) {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
             return
         }
 
-
+        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
         BottomNavigationHelper.setup(this, R.id.nav_home)
-
-        // Кнопка создания события
         findViewById<Button>(R.id.createActivityButton).setOnClickListener {
             startActivity(Intent(this, AddEventActivity::class.java))
         }
-
-        // База данных и репозитории
         val db = EventsDbProvider.get(this)
 
         val repository = EventRepository(
@@ -69,8 +77,6 @@ class MainActivity : AppCompatActivity() {
         )
 
         val userLogin = session.userLogin
-
-        // RecyclerView
         val recycler = findViewById<RecyclerView>(R.id.activitiesRecyclerView)
 
         lateinit var adapter: EventAdapter
@@ -93,7 +99,6 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     if (adapter.isJoined(event.id)) {
-
                         // Отмена записи
                         participantRepository.leaveEvent(event.id, login)
                         adapter.markNotJoined(event.id)
@@ -103,15 +108,11 @@ class MainActivity : AppCompatActivity() {
                             "Вы отменили запись",
                             Toast.LENGTH_SHORT
                         ).show()
-
                     } else {
-
                         // Запись на мероприятие
                         when (participantRepository.joinEvent(event.id, login)) {
-
                             JoinResult.SUCCESS -> {
                                 adapter.markJoined(event.id)
-
                                 Toast.makeText(
                                     this@MainActivity,
                                     "Вы записались на мероприятие!",
@@ -121,7 +122,6 @@ class MainActivity : AppCompatActivity() {
 
                             JoinResult.ALREADY_JOINED -> {
                                 adapter.markJoined(event.id)
-
                                 Toast.makeText(
                                     this@MainActivity,
                                     "Вы уже записаны",
@@ -149,11 +149,8 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         )
-
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = adapter
-
-        // Подписки на изменения участников
         val participantJobs = mutableListOf<Job>()
 
         fun observeParticipantStates(events: List<Event>) {
@@ -161,8 +158,6 @@ class MainActivity : AppCompatActivity() {
             participantJobs.clear()
 
             events.forEach { event ->
-
-                // Количество участников
                 participantJobs.add(
                     lifecycleScope.launch {
                         participantRepository
@@ -172,12 +167,9 @@ class MainActivity : AppCompatActivity() {
                             }
                     }
                 )
-
-                // Проверка записи текущего пользователя
                 participantJobs.add(
                     lifecycleScope.launch {
                         val login = userLogin ?: return@launch
-
                         if (participantRepository.hasJoined(event.id, login)) {
                             adapter.markJoined(event.id)
                         }
@@ -191,11 +183,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val emptyView = findViewById<View>(R.id.emptyView)
-
-        // Управление подпиской на события
         var eventsJob: Job? = null
 
-        // Отображение всех предстоящих событий
         fun showAllEvents() {
             eventsJob?.cancel()
 
@@ -211,7 +200,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Фильтрация по тегу
         fun filterByTag(tagName: String) {
             eventsJob?.cancel()
 
@@ -236,49 +224,31 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-        // Кнопки фильтрации
-        findViewById<Button>(R.id.categoryAll).setOnClickListener {
-            showAllEvents()
-        }
-
-        findViewById<Button>(R.id.categorySport).setOnClickListener {
+        filterByTagHandler = ::filterByTag
+        showAllEventsHandler = ::showAllEvents
+        findViewById<View>(R.id.categorySport).setOnClickListener {
             filterByTag("спорт")
         }
 
-        findViewById<Button>(R.id.categoryMusic).setOnClickListener {
-            filterByTag("музыка")
+        findViewById<View>(R.id.categoryMeetings).setOnClickListener {
+            filterByTag("встречи")
         }
 
-        findViewById<Button>(R.id.categoryStudy).setOnClickListener {
+        findViewById<View>(R.id.categoryStudy).setOnClickListener {
             filterByTag("учёба")
         }
 
-        findViewById<Button>(R.id.categoryFood).setOnClickListener {
-            filterByTag("еда")
-        }
-
-        findViewById<Button>(R.id.categoryGaming).setOnClickListener {
-            filterByTag("игры")
-        }
-
-        findViewById<Button>(R.id.categoryArt).setOnClickListener {
-            filterByTag("искусство")
-        }
-
-        findViewById<Button>(R.id.categoryVolunteering).setOnClickListener {
-            filterByTag("волонтёрство")
-        }
-
-        findViewById<Button>(R.id.categoryOther).setOnClickListener {
+        findViewById<View>(R.id.categoryOther).setOnClickListener {
             filterByTag("другое")
         }
-
-        // Первоначальная загрузка
+        findViewById<View>(R.id.categoriesAll).setOnClickListener {
+            categoryLauncher.launch(
+                Intent(this, CategoriesActivity::class.java)
+            )
+        }
         showAllEvents()
-
-
     }
+
     override fun onResume() {
         super.onResume()
         val nav = findViewById<BottomNavigationView>(R.id.bottomNavigation)

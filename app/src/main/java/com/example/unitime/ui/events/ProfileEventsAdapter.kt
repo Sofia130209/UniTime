@@ -3,6 +3,7 @@ package com.example.unitime.ui.events
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.unitime.R
@@ -36,8 +37,8 @@ class ProfileEventsAdapter(
         val participants: TextView =
             view.findViewById(R.id.activityParticipants)
 
-        //val deleteButton: MaterialButton =
-            //view.findViewById(R.id.deleteEventButton)
+        val deleteButton: ImageView =
+            view.findViewById(R.id.deleteEventButton)
     }
 
     override fun onCreateViewHolder(
@@ -67,11 +68,11 @@ class ProfileEventsAdapter(
         holder.location.text = event.activityLocation
 
         holder.participants.text =
-            "${event.activityParticipants} участников"
+            "${event.activityParticipants} человек"
 
-        //holder.deleteButton.setOnClickListener {
-         //   onDeleteClick(event)
-        //}
+        holder.deleteButton.setOnClickListener {
+            onDeleteClick(event)
+        }
     }
 
     override fun getItemCount(): Int = events.size

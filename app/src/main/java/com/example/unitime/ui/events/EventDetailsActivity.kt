@@ -94,7 +94,7 @@ class EventDetailsActivity : AppCompatActivity() {
         // Следим за количеством участников
         lifecycleScope.launch {
             participantRepository.observeParticipantCount(eventId).collect { count ->
-                participantsText.text = "$count из $limit участников"
+                participantsText.text = "$count/$limit человека"
             }
         }
 

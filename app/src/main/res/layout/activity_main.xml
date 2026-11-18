@@ -5,9 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="@color/background">
+    android:background="#F5F6FA">
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="Фон" />
 
-    <!-- Верхняя панель -->
     <LinearLayout
         android:id="@+id/topPanel"
         android:layout_width="match_parent"
@@ -27,9 +36,11 @@
             android:text="UniTime"
             android:textColor="#20243A"
             android:textSize="26sp"
+            android:fontFamily="@font/oddval_semibold"
             android:textStyle="bold" />
 
         <ImageButton
+            android:visibility="gone"
             android:id="@+id/profileButton"
             android:layout_width="44dp"
             android:layout_height="44dp"
@@ -37,7 +48,6 @@
             android:contentDescription="Профиль"
             android:src="@android:drawable/ic_menu_myplaces"
             app:tint="#20243A" />
-
     </LinearLayout>
 
     <!-- Приветствие -->
@@ -54,7 +64,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Привет!"
+            android:text="Привет! 👋"
             android:textColor="#20243A"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -66,103 +76,255 @@
             android:text="Чем займёмся сегодня?"
             android:textColor="#777B8A"
             android:textSize="16sp" />
-
     </LinearLayout>
 
-    <!-- Категории -->
-    <HorizontalScrollView
-        android:id="@+id/categoryScroll"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:paddingStart="20dp"
-        android:paddingEnd="20dp"
-        android:scrollbars="none"
-        app:layout_constraintTop_toBottomOf="@id/greetingPanel">
+    <!-- ========================================== -->
+    <!-- НОВЫЙ БЛОК: КАТЕГОРИИ (Сетка 2x2) -->
+    <!-- ========================================== -->
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/categoryAll"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:text="Все" />
-
-            <Button
-                android:id="@+id/categorySport"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:text="Спорт" />
-
-            <Button
-                android:id="@+id/categoryMusic"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:text="Музыка" />
-
-            <Button
-                android:id="@+id/categoryStudy"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:text="Учёба" />
-
-            <Button
-                android:id="@+id/categoryFood"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:text="Еда" />
-
-            <Button
-                android:id="@+id/categoryGaming"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:text="Игры" />
-
-            <Button
-                android:id="@+id/categoryArt"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:text="Искусство" />
-
-            <Button
-                android:id="@+id/categoryVolunteering"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:text="Волонтёрство" />
-
-            <Button
-                android:id="@+id/categoryOther"
-                android:layout_width="wrap_content"
-                android:layout_height="42dp"
-                android:layout_marginStart="8dp"
-                android:text="Другое" />
-
-        </LinearLayout>
-    </HorizontalScrollView>
-
-    <!-- Заголовок списка -->
-    <TextView
-        android:id="@+id/activitiesTitle"
+    <!-- Заголовок Категорий -->
+    <LinearLayout
+        android:id="@+id/categoriesHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:paddingHorizontal="20dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/greetingPanel">
+
+        <TextView
+            android:fontFamily="@font/geist_semibold"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Категории"
+            android:textColor="#20243A"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/categoriesAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Все"
+            android:fontFamily="@font/geist_semibold"
+            android:textColor="#3B66B0"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/categoriesRow1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:paddingHorizontal="20dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/categoriesHeader">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/categorySport"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E8E9EF"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/cup"
+                    app:tint="#3B66B0" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="Спорт"
+                    android:textColor="@color/color_font3"
+                    android:fontFamily="@font/geist_semibold"
+                    android:textSize="13sp"/>
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/arror"
+                    app:tint="#3B66B0" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/categoryMeetings"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E8E9EF"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/users"
+                    app:tint="#3B66B0" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="Встречи"
+                    android:textColor="@color/color_font3"
+                    android:fontFamily="@font/geist_semibold"
+                    android:textSize="12sp" />
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/arror"
+                    app:tint="#3B66B0" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/categoriesRow2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:paddingHorizontal="20dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/categoriesRow1">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/categoryStudy"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E8E9EF"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/notebook"
+                    app:tint="#3B66B0" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="Учеба"
+                    android:textColor="@color/color_font3"
+                    android:fontFamily="@font/geist_semibold"
+                    android:textSize="13sp"/>
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/arror"
+                    app:tint="#3B66B0" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Другое -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/categoryOther"
+            android:layout_width="0dp"
+            android:layout_height="60dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E8E9EF"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/star"
+                    app:tint="#3B66B0" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="Другое"
+                    android:textColor="@color/color_font3"
+                    android:fontFamily="@font/geist_semibold"
+                    android:textSize="13sp"/>
+
+                <ImageView
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:src="@drawable/arror"
+                    app:tint="#3B66B0" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
+
+    <TextView
+        android:fontFamily="@font/geist_semibold"
+        android:id="@+id/activitiesTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
-        android:text="Активности рядом"
+        android:text="Ближайшие события"
         android:textColor="#20243A"
         android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/categoryScroll" />
+        app:layout_constraintTop_toBottomOf="@id/categoriesRow2" />
 
     <!-- Список активностей -->
     <androidx.recyclerview.widget.RecyclerView
@@ -177,7 +339,6 @@
         app:layout_constraintTop_toBottomOf="@id/activitiesTitle"
         app:layout_constraintBottom_toTopOf="@id/createActivityButton" />
 
-    <!-- Пустой список активностей -->
     <LinearLayout
         android:id="@+id/emptyView"
         android:layout_width="match_parent"
@@ -205,10 +366,8 @@
             android:textColor="#777B8A"
             android:textSize="14sp"
             android:gravity="center" />
-
     </LinearLayout>
 
-    <!-- Создание активности -->
     <Button
         android:id="@+id/createActivityButton"
         android:layout_width="match_parent"
