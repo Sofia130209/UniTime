@@ -3,6 +3,9 @@ package com.example.unitime.data.repo
 import com.example.unitime.data.local.dao.EventParticipantDao
 import com.example.unitime.data.local.db.auth.UsersDao
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 
 enum class JoinResult {
     SUCCESS,
@@ -16,8 +19,20 @@ class EventParticipantRepository(
     private val usersDao: UsersDao
 ) {
 
-    fun observeParticipantCount(eventId: Long): Flow<Int> =
-        participantDao.observeParticipantCount(eventId)
+    fun observeParticipantCount(eventId: Long): Flow<Int> {
+        return participantDao.observeParticipantCount(eventId)
+    }
+
+    fun observeJoinedEventsCount(userLogin: String): Flow<Int> = flow {
+        val user = usersDao.getUserByLogin(userLogin)
+        if (user != null) {
+            // Получаем Flow из DAO и передаем его наверх
+            emitAll(participantDao.observeJoinedEventsCount(user.id))
+        } else {
+            // Если пользователь не найден, возвращаем 0
+            emit(0)
+        }
+    }
 
     suspend fun joinEvent(
         eventId: Long,

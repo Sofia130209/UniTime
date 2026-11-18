@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,12 +57,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         enableEdgeToEdge()
+        // 1. Сначала устанавливаем разметку!
         setContentView(R.layout.activity_main)
+
+        // 2. Только теперь ищем элементы
+        val tvCreatedCount = findViewById<TextView>(R.id.tvCreatedCount)
+        val tvJoinedCount = findViewById<TextView>(R.id.tvJoinedCount)
 
         BottomNavigationHelper.setup(this, R.id.nav_home)
         findViewById<Button>(R.id.createActivityButton).setOnClickListener {
             startActivity(Intent(this, AddEventActivity::class.java))
         }
+
         val db = EventsDbProvider.get(this)
 
         val repository = EventRepository(
@@ -77,6 +84,27 @@ class MainActivity : AppCompatActivity() {
         )
 
         val userLogin = session.userLogin
+
+        // 3. Настраиваем счетчики
+        if (userLogin != null) {
+            // Счетчик созданных событий
+            lifecycleScope.launch {
+                db.getEventsDao().observeCreatedCount(userLogin).collect { count ->
+                    tvCreatedCount.text = count.toString()
+                }
+            }
+
+            // Счетчик событий, на которые записан пользователь
+            lifecycleScope.launch {
+                participantRepository.observeJoinedEventsCount(userLogin).collect { count ->
+                    tvJoinedCount.text = count.toString()
+                }
+            }
+        } else {
+            tvCreatedCount.text = "0"
+            tvJoinedCount.text = "0"
+        }
+
         val recycler = findViewById<RecyclerView>(R.id.activitiesRecyclerView)
 
         lateinit var adapter: EventAdapter
@@ -226,6 +254,7 @@ class MainActivity : AppCompatActivity() {
         }
         filterByTagHandler = ::filterByTag
         showAllEventsHandler = ::showAllEvents
+
         findViewById<View>(R.id.categorySport).setOnClickListener {
             filterByTag("спорт")
         }

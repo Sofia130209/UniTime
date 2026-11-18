@@ -1,107 +1,219 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="#F7F8FC">
+    android:background="#F7F8FC"
+    android:fitsSystemWindows="true">
 
-    <LinearLayout
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="Фон" />
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:padding="24dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:clipToPadding="false">
 
-        <!-- Аватар -->
-        <ImageView
-            android:id="@+id/imageViewAvatar"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="16dp"
-            android:background="@android:drawable/ic_menu_gallery"
-            android:contentDescription="Аватар"
-            android:scaleType="centerCrop"
-            android:clickable="true"
-            android:focusable="true" />
-
-        <!-- Подсказка под аватаром -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:text="Нажмите, чтобы выбрать фото"
-            android:textSize="12sp"
-            android:textColor="#888888" />
-
-        <!-- Логин -->
-        <EditText
-            android:id="@+id/editTextLogin"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Логин"
-            android:inputType="textPersonName"
-            android:maxLines="1"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2" />
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="40dp"
+            android:paddingBottom="40dp">
 
-        <!-- Имя -->
-        <EditText
-            android:id="@+id/editTextName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Имя"
-            android:inputType="textPersonName"
-            android:maxLines="1"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Регистрация"
+                android:textColor="#3B66B0"
+                android:textSize="18sp"
+                android:fontFamily="@font/oddval_semibold"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="32dp" />
 
-        <!-- Фамилия -->
-        <EditText
-            android:id="@+id/editTextSurname"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Фамилия"
-            android:inputType="textPersonName"
-            android:maxLines="1"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2" />
+            <!-- Аватарка -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="32dp"
+                app:cardCornerRadius="65dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
 
-        <!-- Email -->
-        <EditText
-            android:id="@+id/editTextEmail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:maxLines="1"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2" />
+                <ImageView
+                    android:id="@+id/imageViewAvatar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_profile_placeholder"
+                    android:scaleType="centerCrop"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </com.google.android.material.card.MaterialCardView>
 
-        <!-- Пароль -->
-        <EditText
-            android:id="@+id/editTextPass"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:hint="Введите пароль"
-            android:inputType="textPassword"
-            android:maxLines="1"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2" />
+            <!-- Блок 1: Логин и Пароль -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#E8E9EF"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp">
 
-        <!-- Кнопка регистрации -->
-        <Button
-            android:id="@+id/btnRegister"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Зарегистрироваться"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#5967B2" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
-    </LinearLayout>
-</ScrollView>
+                    <EditText
+                        android:id="@+id/editTextLogin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Логин"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="textPersonName"
+                        android:maxLines="1"
+                        android:padding="12dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/editTextPass"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Пароль"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="textPassword"
+                        android:maxLines="1"
+                        android:padding="12dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Блок 2: Имя и Фамилия -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                app:strokeColor="#E8E9EF"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:strokeWidth="1dp"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <EditText
+                        android:id="@+id/editTextName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Имя"
+                        android:inputType="textPersonName"
+                        android:maxLines="1"
+                        android:padding="12dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:fontFamily="@font/geist_regular"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/editTextSurname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Фамилия"
+                        android:inputType="textPersonName"
+                        android:maxLines="1"
+                        android:padding="12dp"
+                        android:background="@null"
+                        android:fontFamily="@font/geist_regular"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Блок 3: Email (с иконкой) -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                app:strokeColor="#E8E9EF"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="4dp">
+
+                    <ImageView
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:src="@drawable/email"
+                        app:tint="#A0A5B5" />
+
+                    <EditText
+                        android:id="@+id/editTextEmail"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:hint="Email"
+                        android:inputType="textEmailAddress"
+                        android:maxLines="1"
+                        android:padding="12dp"
+                        android:fontFamily="@font/geist_regular"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRegister"
+                app:strokeWidth="1dp"
+                android:layout_width="match_parent"
+                app:strokeColor="#E8E9EF"
+                android:layout_height="56dp"
+                android:text="Зарегистрироваться"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:fontFamily="@font/geist_semibold"
+                app:backgroundTint="#3B66B0"
+                app:cornerRadius="20dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

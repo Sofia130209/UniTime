@@ -1,241 +1,378 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#F7F8FC">
-
-    <ScrollView
+    android:background="@color/background">
+    <ImageView
+        android:layout_marginTop="50dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        app:strokeColor="#E8E9EF"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:padding="20dp"
+            android:paddingBottom="40dp">
 
-            <!-- Заголовок -->
-            <TextView
-                android:layout_width="match_parent"
+            <!-- АВАТАРКА С КНОПКОЙ РЕДАКТИРОВАНИЯ -->
+            <FrameLayout
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Мой профиль"
-                android:textColor="#252942"
-                android:textSize="26sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="20dp" />
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp">
 
-            <!-- Карточка пользователя -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    app:strokeColor="#E8E9EF"
+                    app:cardCornerRadius="50dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="0dp">
+
+                    <ImageView
+                        android:id="@+id/profileAvatar"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_profile_placeholder"
+                        android:contentDescription="Аватар" />
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Маленькая кнопка редактирования -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/editProfileButton"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="bottom|end"
+                    app:cardBackgroundColor="#3B66B0"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="#FFFFFF"
+                    app:strokeWidth="1dp">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/edit"
+                        app:tint="#FFFFFF" />
+                </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
+
+            <!-- ИМЯ И НИК -->
+            <TextView
+                android:id="@+id/profileName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:text="Name"
+                android:textColor="#20243A"
+                android:textSize="21sp"
+                android:fontFamily="@font/geist_semibold"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/profileLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="4dp"
+                android:text="@nickname"
+                android:textColor="#85899E"
+                android:textSize="12sp"
+                android:fontFamily="@font/geist_regular" />
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="2dp"
+                android:layout_marginTop="16dp"
                 app:cardBackgroundColor="#FFFFFF"
-                app:strokeWidth="0dp">
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#E8E9EF"
+                app:cardElevation="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:gravity="center"
-                    android:padding="24dp">
-
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="104dp"
-                        android:layout_height="104dp"
-                        android:layout_marginBottom="16dp"
-                        app:cardCornerRadius="52dp"
-                        app:cardElevation="0dp"
-                        app:strokeWidth="0dp"
-                        app:cardBackgroundColor="#E9EAFE">
-
-                        <ImageView
-                            android:id="@+id/profileAvatar"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:src="@drawable/ic_profile_placeholder"
-                            android:scaleType="centerCrop"
-                            android:contentDescription="Аватар пользователя" />
-
-                    </com.google.android.material.card.MaterialCardView>
+                    android:padding="20dp">
 
                     <TextView
-                        android:id="@+id/profileName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Имя пользователя"
-                        android:textColor="#252942"
-                        android:textSize="22sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/profileLogin"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@username"
-                        android:textColor="#85899E"
+                        android:text="Контакты"
+                        android:textColor="#20243A"
                         android:textSize="14sp"
-                        android:layout_marginTop="4dp" />
+                        android:fontFamily="@font/geist_semibold"
+                        android:layout_marginBottom="16dp" />
 
-                    <Button
-                        android:id="@+id/editProfileButton"
+                    <!-- Telegram -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Редактировать профиль"
-                        android:textAllCaps="false"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#5967B2"
-                        android:layout_marginTop="20dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="12dp">
 
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/telegram"
+                            app:tint="#3B66B0" />
+
+                        <TextView
+                            android:id="@+id/profileTelegram"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="@tgnick"
+                            android:textColor="#85899E"
+                            android:textSize="16sp"
+                            android:fontFamily="@font/geist_regular" />
+                    </LinearLayout>
+
+                    <!-- Телефон -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/phone"
+                            app:tint="#3B66B0" />
+
+                        <TextView
+                            android:id="@+id/profilePhone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="+375 XX XXX-XX-XX"
+                            android:textColor="#85899E"
+                            android:textSize="16sp"
+                            android:fontFamily="@font/geist_regular" />
+                    </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Статистика -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Моя активность"
-                android:textColor="#252942"
-                android:textSize="19sp"
-                android:textStyle="bold"
-                android:layout_marginTop="26dp"
-                android:layout_marginBottom="12dp" />
-
-            <LinearLayout
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_marginTop="10dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:strokeColor="#E8E9EF"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp">
 
-
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="0dp"
-                    android:layout_height="110dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="6dp"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="1dp"
-                    app:cardBackgroundColor="#FFFFFF"
-                    app:strokeWidth="0dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingVertical="20dp">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:gravity="center"
                         android:orientation="vertical">
 
+                        <FrameLayout
+                            android:layout_width="52dp"
+                            android:layout_height="52dp"
+                            android:background="@drawable/ellipse_svg">
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/calendar"
+                                app:tint="#3B66B0" />
+                        </FrameLayout>
+
                         <TextView
-                            android:id="@+id/profileCreatedCount"
+                            android:id="@+id/profileJoinedCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
                             android:text="0"
-                            android:textColor="#5967B2"
-                            android:textSize="28sp"
+                            android:textColor="#20243A"
+                            android:textSize="26sp"
+                            android:fontFamily="@font/geist_semibold"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Мероприятий"
+                            android:textColor="#85899E"
+                            android:textSize="13sp"
+                            android:fontFamily="@font/geist_regular" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginVertical="16dp"
+                        android:background="#E8E9EF" />
+
+                    <!-- Правая часть: Создано мной -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <FrameLayout
+                            android:layout_width="52dp"
+                            android:layout_height="52dp"
+                            android:background="@drawable/ellipse_svg">
+                            <ImageView
+                                android:layout_width="30dp"
+                                android:layout_height="30dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/circle"
+                                app:tint="#3B66B0" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/profileCreatedCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="0"
+                            android:textColor="#20243A"
+                            android:textSize="26sp"
+                            android:fontFamily="@font/geist_semibold"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
                             android:text="Создано событий"
                             android:textColor="#85899E"
-                            android:textSize="13sp" />
-
+                            android:textSize="13sp"
+                            android:fontFamily="@font/geist_regular" />
                     </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-            </LinearLayout>
-
-            <!-- Мои мероприятия -->
-            <TextView
-                android:layout_width="wrap_content"
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Мои мероприятия"
-                android:textColor="#252942"
-                android:textSize="19sp"
-                android:textStyle="bold"
-                android:layout_marginTop="26dp"
-                android:layout_marginBottom="12dp" />
+                android:layout_marginTop="10dp"
+                app:strokeColor="#E8E9EF"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/letter"
+                        app:tint="#3B66B0" />
+
+                    <TextView
+                        android:id="@+id/profileEmail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="mymail@gmail.com"
+                        android:textColor="@color/color_font2"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/geist_semibold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- КАРТОЧКА: ВЫЙТИ -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/logoutCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="20dp"
+                app:strokeColor="#E8E9EF"
+                app:cardElevation="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="20dp">
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/logout"
+                        app:tint="#3B66B0" />
+
+                    <TextView
+                        android:id="@+id/logoutButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:text="Выйти из аккаунта"
+                        android:textColor="#3B66B0"
+                        android:textSize="16sp"
+                        android:fontFamily="@font/geist_medium" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Скрытый список событий (если он нужен в логике) -->
             <TextView
                 android:id="@+id/emptyEventsText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Вы пока не создали ни одного мероприятия"
-                android:textColor="#85899E"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:padding="24dp"
                 android:visibility="gone" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/profileEventsRecycler"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:nestedScrollingEnabled="false"
-                android:overScrollMode="never" />
-
-            <!-- Аккаунт -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Аккаунт"
-                android:textColor="#252942"
-                android:textSize="19sp"
-                android:textStyle="bold"
-                android:layout_marginTop="26dp"
-                android:layout_marginBottom="12dp" />
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
-                app:cardBackgroundColor="#FFFFFF"
-                app:strokeWidth="0dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/profileEmail"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Email: user@example.com"
-                        android:textColor="#454960"
-                        android:textSize="15sp"
-                        android:padding="18dp" />
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#F0F1F6" />
-
-                    <TextView
-                        android:id="@+id/logoutButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Выйти из аккаунта"
-                        android:textColor="#D95364"
-                        android:textSize="15sp"
-                        android:padding="18dp"
-                        android:clickable="true"
-                        android:focusable="true" />
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                android:layout_marginTop="16dp"
+                android:nestedScrollingEnabled="false" />
 
         </LinearLayout>
-    </ScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
+        app:strokeColor="#E8E9EF"
         android:layout_height="wrap_content"
         android:background="#FFFFFF"
         app:menu="@menu/bottom_navigation_menu"
@@ -246,4 +383,4 @@
         app:itemRippleColor="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

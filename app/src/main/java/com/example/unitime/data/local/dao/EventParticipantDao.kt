@@ -10,7 +10,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EventParticipantDao {
-
+    @Query("SELECT COUNT(DISTINCT event_id) FROM event_participants WHERE user_id = :userId")
+    fun observeJoinedEventsCount(userId: Long): Flow<Int>
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(participant: EventParticipant): Long
 

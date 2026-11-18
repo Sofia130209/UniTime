@@ -36,7 +36,8 @@ abstract class EventsDb : RoomDatabase() {
 interface EventsDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(event: Event): Long
-
+    @Query("SELECT COUNT(*) FROM ${Event.TABLE_NAME} WHERE ${Event.CREATED_BY_LOGIN} = :login")
+    fun observeCreatedCount(login: String?): Flow<Int>
     @Update suspend fun update(event: Event)
     @Delete suspend fun delete(event: Event)
 

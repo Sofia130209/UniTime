@@ -1,4 +1,3 @@
-
 package com.example.unitime.ui.auth
 
 import android.content.Intent
@@ -19,6 +18,7 @@ import com.example.unitime.R
 import com.example.unitime.data.local.db.auth.UsersDbProvider
 import com.example.unitime.data.local.db.events.EventsDbProvider
 import com.example.unitime.data.managers.SessionManager
+import com.example.unitime.data.repo.EventParticipantRepository
 import com.example.unitime.ui.BottomNavigationHelper
 import com.example.unitime.ui.events.ProfileEventsAdapter
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -39,29 +39,56 @@ class ProfileActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 1. СНАЧАЛА устанавливаем разметку
         setContentView(R.layout.activity_profile)
 
-        BottomNavigationHelper.setup(this, R.id.nav_profile)
-
+        // 2. Инициализируем сессию
         session = SessionManager(this)
+        val login = session.userLogin
 
+        if (login == null) {
+            Toast.makeText(this, "Пользователь не авторизован", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        // 3. Находим все View
         avatarField = findViewById(R.id.profileAvatar)
         nameText = findViewById(R.id.profileName)
         loginText = findViewById(R.id.profileLogin)
         emailText = findViewById(R.id.profileEmail)
 
-        val login = session.userLogin
+        val tvJoinedCount = findViewById<TextView>(R.id.profileJoinedCount)
+        val tvCreatedCount = findViewById<TextView>(R.id.profileCreatedCount)
 
-        if (login == null) {
-            Toast.makeText(
-                this,
-                "Пользователь не авторизован",
-                Toast.LENGTH_SHORT
-            ).show()
-            finish()
-            return
+        // 4. Настраиваем навигацию
+        BottomNavigationHelper.setup(this, R.id.nav_profile)
+
+        // 5. Настраиваем базу данных и репозитории
+        val db = EventsDbProvider.get(this)
+        val usersDb = UsersDbProvider.get(this)
+        val participantRepository = EventParticipantRepository(
+            db.getEventParticipantDao(),
+            usersDb.getUsersDao()
+        )
+
+        // 6. Подписываемся на обновление счетчиков
+        lifecycleScope.launch {
+            // Счетчик событий, на которые записан пользователь
+            participantRepository.observeJoinedEventsCount(login).collect { count ->
+                tvJoinedCount.text = count.toString()
+            }
         }
 
+        lifecycleScope.launch {
+            // Счетчик созданных событий
+            db.getEventsDao().observeCreatedCount(login).collect { count ->
+                tvCreatedCount.text = count.toString()
+            }
+        }
+
+        // 7. Загружаем остальные данные
+        loadUserData()
         setupEvents(login)
         setupButtons()
     }
@@ -72,7 +99,7 @@ class ProfileActivity : ComponentActivity() {
         nav.post {
             BottomNavigationHelper.setup(this, R.id.nav_profile)
         }
-        loadUserData()  // уже есть
+        loadUserData()
     }
 
     // Загрузка актуальной информации о пользователе
@@ -103,9 +130,7 @@ class ProfileActivity : ComponentActivity() {
                         transformations(CircleCropTransformation())
                     }
                 } else {
-                    avatarField.setImageResource(
-                        R.drawable.ic_profile_placeholder
-                    )
+                    avatarField.setImageResource(R.drawable.ic_profile_placeholder)
                 }
             } else {
                 Toast.makeText(
@@ -119,21 +144,12 @@ class ProfileActivity : ComponentActivity() {
 
     // Настройка мероприятий пользователя
     private fun setupEvents(login: String) {
-        val eventsRecycler =
-            findViewById<RecyclerView>(R.id.profileEventsRecycler)
+        val eventsRecycler = findViewById<RecyclerView>(R.id.profileEventsRecycler)
+        val emptyEventsText = findViewById<TextView>(R.id.emptyEventsText)
 
-        val emptyEventsText =
-            findViewById<TextView>(R.id.emptyEventsText)
-
-        val createdCount =
-            findViewById<TextView>(R.id.profileCreatedCount)
-
-        val eventsDao = EventsDbProvider
-            .get(this)
-            .getEventsDao()
+        val eventsDao = EventsDbProvider.get(this).getEventsDao()
 
         val adapter = ProfileEventsAdapter { event ->
-
             AlertDialog.Builder(this)
                 .setTitle("Удалить мероприятие?")
                 .setMessage(
@@ -142,13 +158,11 @@ class ProfileActivity : ComponentActivity() {
                 )
                 .setNegativeButton("Отмена", null)
                 .setPositiveButton("Удалить") { _, _ ->
-
                     lifecycleScope.launch {
                         withContext(Dispatchers.IO) {
                             eventsDao.deleteCrossRefsForEvent(event.id)
                             eventsDao.delete(event)
                         }
-
                         Toast.makeText(
                             this@ProfileActivity,
                             "Мероприятие удалено",
@@ -164,10 +178,11 @@ class ProfileActivity : ComponentActivity() {
 
         lifecycleScope.launch {
             eventsDao.observeCreatedByUser(login).collect { events ->
-
                 adapter.submitList(events)
 
-                createdCount.text = events.size.toString()
+                // Счетчик теперь обновляется через Flow в onCreate, 
+                // поэтому ручное обновление здесь не нужно.
+                // createdCount.text = events.size.toString() 
 
                 emptyEventsText.visibility =
                     if (events.isEmpty()) View.VISIBLE else View.GONE
@@ -180,28 +195,19 @@ class ProfileActivity : ComponentActivity() {
 
     // Настройка кнопок профиля
     private fun setupButtons() {
-
-        val btnEditProfile =
-            findViewById<Button>(R.id.editProfileButton)
+        // МЕНЯЕМ Button НА View !!!
+        val btnEditProfile = findViewById<View>(R.id.editProfileButton)
 
         btnEditProfile.setOnClickListener {
-            startActivity(
-                Intent(this, EditProfileActivity::class.java)
-            )
+            startActivity(Intent(this, EditProfileActivity::class.java))
         }
 
-        val btnLogout =
-            findViewById<TextView>(R.id.logoutButton)
-
+        val btnLogout = findViewById<TextView>(R.id.logoutButton)
         btnLogout.setOnClickListener {
             session.clear()
 
-            val intent = Intent(
-                this,
-                LoginActivity::class.java
-            ).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                        Intent.FLAG_ACTIVITY_CLEAR_TASK
+            val intent = Intent(this, LoginActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             }
 
             startActivity(intent)
