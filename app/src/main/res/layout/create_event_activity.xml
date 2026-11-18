@@ -1,177 +1,244 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F6FA"
-    android:fillViewport="true">
+    android:background="#F7F8FC"
+    android:fitsSystemWindows="true">
 
-    <LinearLayout
+    <!-- Фоновое изображение -->
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="Фон" />
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:clipToPadding="false">
 
-        <!-- Заголовок -->
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Создать активность"
-            android:textColor="#20243A"
-            android:textSize="26sp"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="40dp"
+            android:paddingBottom="40dp">
 
-        <!-- Название -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Название активности"
-            android:textColor="#20243A"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            <!-- Заголовок -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Создать активность"
+                android:textColor="#3B66B0"
+                android:textSize="22sp"
+                android:fontFamily="@font/oddval_semibold"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="32dp" />
 
-        <EditText
-            android:id="@+id/eventTitleInput"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/edit_text"
-            android:hint="Например, вечерний футбол"
-            android:padding="12dp"
-            android:singleLine="true"
-            android:textSize="15sp" />
+            <!-- СЕКЦИЯ 1: Основная информация -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Основная информация"
+                android:textColor="#20243A"
+                android:textSize="16sp"
+                android:fontFamily="@font/geist_semibold"
+                android:layout_marginBottom="12dp"/>
 
-        <!-- Описание -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="Описание"
-            android:textColor="#20243A"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#E8E9EF"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp">
 
-        <EditText
-            android:id="@+id/eventDescriptionInput"
-            android:layout_width="match_parent"
-            android:layout_height="110dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/edit_text"
-            android:gravity="top"
-            android:hint="Расскажите подробнее о мероприятии..."
-            android:padding="12dp"
-            android:textSize="15sp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
-        <!-- Категория -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="Категория"
-            android:textColor="#20243A"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+                    <EditText
+                        android:id="@+id/eventTitleInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Название (например, вечерний футбол)"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
 
-        <Spinner
-            android:id="@+id/eventCategorySpinner"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/edit_text" />
+                    <EditText
+                        android:id="@+id/eventDescriptionInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="110dp"
+                        android:hint="Описание мероприятия..."
+                        android:fontFamily="@font/geist_regular"
+                        android:gravity="top"
+                        android:inputType="textMultiLine"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        <!-- Дата -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="Дата проведения"
-            android:textColor="#20243A"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            <!-- СЕКЦИЯ 2: Категория и детали -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Детали мероприятия"
+                android:textColor="#20243A"
+                android:textSize="16sp"
+                android:fontFamily="@font/geist_semibold"
+                android:layout_marginBottom="12dp"/>
 
-        <EditText
-            android:id="@+id/eventDateInput"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/edit_text"
-            android:clickable="true"
-            android:focusable="false"
-            android:hint="Выберите дату"
-            android:padding="12dp" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#E8E9EF"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp">
 
-        <!-- Время -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="Время начала"
-            android:textColor="#20243A"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
-        <EditText
-            android:id="@+id/eventTimeInput"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/edit_text"
-            android:clickable="true"
-            android:focusable="false"
-            android:hint="Выберите время"
-            android:padding="12dp" />
+                    <!-- Категория (Spinner) -->
+                    <Spinner
+                        android:id="@+id/eventCategorySpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="56dp"
+                        android:background="@null"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="12dp" />
 
-        <!-- Место -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="Место проведения"
-            android:textColor="#20243A"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+                    <!-- Дата -->
+                    <EditText
+                        android:id="@+id/eventDateInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Выберите дату"
+                        android:fontFamily="@font/geist_regular"
+                        android:clickable="true"
+                        android:focusable="false"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
 
-        <EditText
-            android:id="@+id/eventLocationInput"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/edit_text"
-            android:hint="Например, спортивная площадка ВГУ"
-            android:padding="12dp"
-            android:singleLine="true" />
+                    <!-- Время -->
+                    <EditText
+                        android:id="@+id/eventTimeInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Выберите время"
+                        android:fontFamily="@font/geist_regular"
+                        android:clickable="true"
+                        android:focusable="false"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
 
-        <!-- Количество участников -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="18dp"
-            android:text="Максимальное количество участников"
-            android:textColor="#20243A"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+                    <!-- Место -->
+                    <EditText
+                        android:id="@+id/eventLocationInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Место (например, спортивная площадка)"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        <EditText
-            android:id="@+id/eventMaxParticipantsInput"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="8dp"
-            android:background="@android:drawable/edit_text"
-            android:hint="Например, 10"
-            android:inputType="number"
-            android:padding="12dp"
-            android:singleLine="true" />
+            <!-- СЕКЦИЯ 3: Участники -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Участники"
+                android:textColor="#20243A"
+                android:textSize="16sp"
+                android:fontFamily="@font/geist_semibold"
+                android:layout_marginBottom="12dp"/>
 
-        <!-- Кнопка создания -->
-        <Button
-            android:id="@+id/createEventButton"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:layout_marginTop="28dp"
-            android:layout_marginBottom="20dp"
-            android:text="Создать активность" />
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#E8E9EF"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp">
 
-    </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
-</ScrollView>
+                    <EditText
+                        android:id="@+id/eventMaxParticipantsInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Максимальное количество (например, 10)"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="number"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Кнопка создания -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/createEventButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Создать активность"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:fontFamily="@font/geist_semibold"
+                app:backgroundTint="#3B66B0"
+                app:cornerRadius="20dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

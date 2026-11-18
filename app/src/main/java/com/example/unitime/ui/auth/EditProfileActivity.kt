@@ -1,19 +1,26 @@
 package com.example.unitime.ui.auth
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Patterns
-import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.lifecycleScope
+import coil.load
+import coil.transform.CircleCropTransformation
 import com.example.unitime.R
 import com.example.unitime.data.local.db.auth.UsersDbProvider
 import com.example.unitime.data.managers.SessionManager
 import com.example.unitime.data.managers.UserManager
+import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 
 class EditProfileActivity : ComponentActivity() {
 
@@ -24,11 +31,31 @@ class EditProfileActivity : ComponentActivity() {
     private lateinit var loginField: EditText
     private lateinit var emailField: EditText
 
+    private lateinit var telegramField: EditText
+    private lateinit var phoneField: EditText
+
     private lateinit var currentPasswordField: EditText
     private lateinit var newPasswordField: EditText
     private lateinit var repeatPasswordField: EditText
 
-    private lateinit var saveButton: Button
+    private lateinit var saveButton: MaterialButton
+    private lateinit var avatarImageView: ImageView
+
+    private var selectedImageUri: Uri? = null
+
+    private val pickImageLauncher = registerForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            selectedImageUri = uri
+            avatarImageView.load(uri) {
+                crossfade(true)
+                placeholder(R.drawable.ic_profile_placeholder)
+                error(R.drawable.ic_profile_placeholder)
+                transformations(CircleCropTransformation())
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,11 +68,20 @@ class EditProfileActivity : ComponentActivity() {
         loginField = findViewById(R.id.editLogin)
         emailField = findViewById(R.id.editEmail)
 
+        // ИНИЦИАЛИЗАЦИЯ НОВЫХ ПОЛЕЙ
+        telegramField = findViewById(R.id.editTelegram)
+        phoneField = findViewById(R.id.editPhone)
+
         currentPasswordField = findViewById(R.id.editCurrentPassword)
         newPasswordField = findViewById(R.id.editNewPassword)
         repeatPasswordField = findViewById(R.id.editRepeatPassword)
 
         saveButton = findViewById(R.id.saveProfileButton)
+        avatarImageView = findViewById(R.id.editAvatarImage)
+
+        avatarImageView.setOnClickListener {
+            pickImageLauncher.launch("image/*")
+        }
 
         loadUser()
 
@@ -81,6 +117,21 @@ class EditProfileActivity : ComponentActivity() {
             surnameField.setText(user.surname)
             loginField.setText(user.login)
             emailField.setText(user.email)
+
+            telegramField.setText(user.telegram ?: "")
+            phoneField.setText(user.phone ?: "")
+
+            val avatarFile = user.avatarPath?.let(::File)?.takeIf { it.exists() }
+            if (avatarFile != null) {
+                avatarImageView.load(avatarFile) {
+                    crossfade(true)
+                    placeholder(R.drawable.ic_profile_placeholder)
+                    error(R.drawable.ic_profile_placeholder)
+                    transformations(CircleCropTransformation())
+                }
+            } else {
+                avatarImageView.setImageResource(R.drawable.ic_profile_placeholder)
+            }
         }
     }
 
@@ -89,6 +140,9 @@ class EditProfileActivity : ComponentActivity() {
         val surname = surnameField.text.toString().trim()
         val login = loginField.text.toString().trim()
         val email = emailField.text.toString().trim()
+
+        val telegram = telegramField.text.toString().trim()
+        val phone = phoneField.text.toString().trim()
 
         val currentPassword = currentPasswordField.text.toString()
         val newPassword = newPasswordField.text.toString()
@@ -160,13 +214,25 @@ class EditProfileActivity : ComponentActivity() {
                         passwordHash = userManager.hashPassword(newPassword)
                     }
 
+                    var newAvatarPath = user.avatarPath
+                    if (selectedImageUri != null) {
+                        val savedPath = saveImageToInternalStorage(selectedImageUri!!)
+                        if (savedPath != null) {
+                            newAvatarPath = savedPath
+                        }
+                    }
+
                     dao.update(
                         user.copy(
                             name = name,
                             surname = surname,
                             login = login,
                             email = email,
-                            password = passwordHash
+                            password = passwordHash,
+                            avatarPath = newAvatarPath,
+                            // СОХРАНЕНИЕ НОВЫХ ПОЛЕЙ (если пусто — пишем null)
+                            telegram = telegram.ifBlank { null },
+                            phone = phone.ifBlank { null }
                         )
                     )
 
@@ -175,7 +241,6 @@ class EditProfileActivity : ComponentActivity() {
 
                 if (result == "SUCCESS") {
                     sessionManager.userLogin = login
-
                     showMessage("Профиль успешно обновлён")
                     finish()
                 } else {
@@ -187,6 +252,25 @@ class EditProfileActivity : ComponentActivity() {
             } finally {
                 saveButton.isEnabled = true
             }
+        }
+    }
+
+    private fun saveImageToInternalStorage(uri: Uri): String? {
+        return try {
+            val inputStream = contentResolver.openInputStream(uri)
+            val file = File(filesDir, "avatar_${System.currentTimeMillis()}.jpg")
+            val outputStream = FileOutputStream(file)
+
+            inputStream?.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+            file.absolutePath
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
         }
     }
 

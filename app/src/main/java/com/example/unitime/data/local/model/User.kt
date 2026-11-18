@@ -16,7 +16,11 @@ data class User(
     @ColumnInfo(name = EMAIL_COLUMN) val email: String,
     @ColumnInfo(name = LOGIN_COLUMN) val login: String,
     @ColumnInfo(name = PASSWORD_HASH_COLUMN) val password: String,
-    @ColumnInfo(name = AVATAR_COLUMN) val avatarPath: String? = null
+    @ColumnInfo(name = AVATAR_COLUMN) val avatarPath: String? = null,
+
+    // НОВЫЕ ПОЛЯ:
+    @ColumnInfo(name = TELEGRAM_COLUMN) val telegram: String? = null,
+    @ColumnInfo(name = PHONE_COLUMN) val phone: String? = null
 
 ) {
     companion object {
@@ -28,5 +32,9 @@ data class User(
         const val EMAIL_COLUMN = "email"
         const val PASSWORD_HASH_COLUMN = "password_hash"
         const val AVATAR_COLUMN = "avatar"
+
+        // НОВЫЕ КОНСТАНТЫ:
+        const val TELEGRAM_COLUMN = "telegram"
+        const val PHONE_COLUMN = "phone"
     }
 }

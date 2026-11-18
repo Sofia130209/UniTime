@@ -1,140 +1,348 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F7F8FC"
-    android:fillViewport="true">
+    android:fitsSystemWindows="true">
 
-    <LinearLayout
+    <!-- Фоновое изображение -->
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:contentDescription="Фон" />
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:clipToPadding="false">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Редактирование профиля"
-            android:textColor="#252942"
-            android:textSize="25sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp"/>
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingTop="40dp"
+            android:paddingBottom="40dp">
 
-        <!-- Личные данные -->
+            <!-- Заголовок -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Редактирование"
+                android:textColor="#3B66B0"
+                android:textSize="22sp"
+                android:fontFamily="@font/oddval_semibold"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:layout_marginBottom="24dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Личные данные"
-            android:textColor="#5967B2"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp"/>
+            <!-- АВАТАРКА ДЛЯ РЕДАКТИРОВАНИЯ -->
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="24dp">
 
-        <EditText
-            android:id="@+id/editName"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:hint="Имя"
-            android:singleLine="true"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2"/>
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="110dp"
+                    android:layout_height="110dp"
+                    app:cardCornerRadius="55dp"
+                    app:cardElevation="0dp"
+                    app:strokeColor="#E8E9EF"
+                    app:strokeWidth="1dp">
 
-        <EditText
-            android:id="@+id/editSurname"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:hint="Фамилия"
-            android:singleLine="true"
-            android:layout_marginTop="10dp"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2"/>
+                    <ImageView
+                        android:id="@+id/editAvatarImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/ic_profile_placeholder"
+                        android:contentDescription="Аватар" />
+                </com.google.android.material.card.MaterialCardView>
 
-        <!-- Данные аккаунта -->
+                <!-- Кнопка-карандаш поверх аватарки -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/editAvatarButton"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_gravity="bottom|end"
+                    android:layout_marginBottom="4dp"
+                    android:layout_marginEnd="4dp"
+                    app:cardBackgroundColor="#3B66B0"
+                    app:cardCornerRadius="18dp"
+                    app:cardElevation="2dp"
+                    app:strokeColor="#FFFFFF"
+                    app:strokeWidth="2dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Данные аккаунта"
-            android:textColor="#5967B2"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            android:layout_marginTop="26dp"
-            android:layout_marginBottom="12dp"/>
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/edit"
+                        app:tint="#FFFFFF" />
+                </com.google.android.material.card.MaterialCardView>
+            </FrameLayout>
 
-        <EditText
-            android:id="@+id/editLogin"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:hint="Логин"
-            android:singleLine="true"
-            android:inputType="text"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2"/>
+            <!-- СЕКЦИЯ 1: Личные данные -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Личные данные"
+                android:textColor="#20243A"
+                android:textSize="16sp"
+                android:fontFamily="@font/geist_semibold"
+                android:layout_marginBottom="12dp"/>
 
-        <EditText
-            android:id="@+id/editEmail"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:hint="Email"
-            android:singleLine="true"
-            android:inputType="textEmailAddress"
-            android:layout_marginTop="10dp"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2"/>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#E8E9EF"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp">
 
-        <!-- Пароль -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Изменение пароля"
-            android:textColor="#5967B2"
-            android:textSize="17sp"
-            android:textStyle="bold"
-            android:layout_marginTop="26dp"
-            android:layout_marginBottom="12dp"/>
+                    <EditText
+                        android:id="@+id/editName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Имя"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="textPersonName"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
 
-        <EditText
-            android:id="@+id/editCurrentPassword"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:hint="Текущий пароль"
-            android:inputType="textPassword"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2"/>
+                    <EditText
+                        android:id="@+id/editSurname"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Фамилия"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="textPersonName"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-        <EditText
-            android:id="@+id/editNewPassword"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:hint="Новый пароль"
-            android:inputType="textPassword"
-            android:layout_marginTop="10dp"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2"/>
+            <!-- СЕКЦИЯ 2: Контакты (НОВАЯ) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Контакты"
+                android:textColor="#20243A"
+                android:textSize="16sp"
+                android:fontFamily="@font/geist_semibold"
+                android:layout_marginBottom="12dp"/>
 
-        <EditText
-            android:id="@+id/editRepeatPassword"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:hint="Повторите новый пароль"
-            android:inputType="textPassword"
-            android:layout_marginTop="10dp"
-            android:padding="14dp"
-            android:backgroundTint="#5967B2"/>
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#E8E9EF"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/saveProfileButton"
-            android:layout_width="match_parent"
-            android:layout_height="54dp"
-            android:text="Сохранить изменения"
-            android:textAllCaps="false"
-            android:textSize="15sp"
-            android:layout_marginTop="28dp"
-            android:backgroundTint="#5967B2"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
 
-    </LinearLayout>
+                    <EditText
+                        android:id="@+id/editTelegram"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Telegram (например, @nickname)"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
 
-</ScrollView>
+                    <EditText
+                        android:id="@+id/editPhone"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Телефон (например, +375 29 123-45-67)"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="phone"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- СЕКЦИЯ 3: Данные аккаунта -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Данные аккаунта"
+                android:textColor="#20243A"
+                android:textSize="16sp"
+                android:fontFamily="@font/geist_semibold"
+                android:layout_marginBottom="12dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#E8E9EF"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <EditText
+                        android:id="@+id/editLogin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Логин"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="text"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/editEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Email"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="textEmailAddress"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- СЕКЦИЯ 4: Изменение пароля -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Изменение пароля"
+                android:textColor="#20243A"
+                android:textSize="16sp"
+                android:fontFamily="@font/geist_semibold"
+                android:layout_marginBottom="12dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="24dp"
+                app:strokeColor="#E8E9EF"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <EditText
+                        android:id="@+id/editCurrentPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Текущий пароль"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="textPassword"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/editNewPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Новый пароль"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="textPassword"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+
+                    <EditText
+                        android:id="@+id/editRepeatPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Повторите новый пароль"
+                        android:fontFamily="@font/geist_regular"
+                        android:inputType="textPassword"
+                        android:singleLine="true"
+                        android:padding="16dp"
+                        android:background="@null"
+                        android:textColor="#20243A"
+                        android:textColorHint="#A0A5B5"
+                        android:textSize="16sp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Кнопка сохранения -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/saveProfileButton"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:text="Сохранить изменения"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:fontFamily="@font/geist_semibold"
+                app:backgroundTint="#3B66B0"
+                app:cornerRadius="20dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -12,6 +12,9 @@ object UsersDbProvider {
                 context.applicationContext,
                 UsersDb::class.java,
                 "users_database"
-            ).build().also { instance = it }
+            )
+                .fallbackToDestructiveMigration()
+                .build()
+                .also { instance = it }
         }
 }

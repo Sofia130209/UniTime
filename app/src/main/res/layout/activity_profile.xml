@@ -58,8 +58,8 @@
                 <!-- Маленькая кнопка редактирования -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/editProfileButton"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
                     android:layout_gravity="bottom|end"
                     app:cardBackgroundColor="#3B66B0"
                     app:cardCornerRadius="18dp"
@@ -224,7 +224,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Мероприятий"
+                            android:text="Учавствую"
                             android:textColor="#85899E"
                             android:textSize="13sp"
                             android:fontFamily="@font/geist_regular" />

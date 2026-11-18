@@ -3,7 +3,6 @@ package com.example.unitime.ui.auth
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -36,6 +35,10 @@ class ProfileActivity : ComponentActivity() {
     private lateinit var loginText: TextView
     private lateinit var emailText: TextView
 
+    // НОВЫЕ ПЕРЕМЕННЫЕ для контактов
+    private lateinit var telegramText: TextView
+    private lateinit var phoneText: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -57,6 +60,10 @@ class ProfileActivity : ComponentActivity() {
         nameText = findViewById(R.id.profileName)
         loginText = findViewById(R.id.profileLogin)
         emailText = findViewById(R.id.profileEmail)
+
+        // Инициализация полей контактов
+        telegramText = findViewById(R.id.profileTelegram)
+        phoneText = findViewById(R.id.profilePhone)
 
         val tvJoinedCount = findViewById<TextView>(R.id.profileJoinedCount)
         val tvCreatedCount = findViewById<TextView>(R.id.profileCreatedCount)
@@ -117,6 +124,19 @@ class ProfileActivity : ComponentActivity() {
                 nameText.text = "${user.name} ${user.surname}"
                 loginText.text = "@${user.login}"
                 emailText.text = user.email
+
+                // Отображение контактов (если пусто - показываем "Не указан")
+                telegramText.text = if (user.telegram.isNullOrBlank()) {
+                    "Не указан"
+                } else {
+                    user.telegram
+                }
+
+                phoneText.text = if (user.phone.isNullOrBlank()) {
+                    "Не указан"
+                } else {
+                    user.phone
+                }
 
                 val avatarFile = user.avatarPath
                     ?.let(::File)
@@ -180,9 +200,8 @@ class ProfileActivity : ComponentActivity() {
             eventsDao.observeCreatedByUser(login).collect { events ->
                 adapter.submitList(events)
 
-                // Счетчик теперь обновляется через Flow в onCreate, 
+                // Счетчик теперь обновляется через Flow в onCreate,
                 // поэтому ручное обновление здесь не нужно.
-                // createdCount.text = events.size.toString() 
 
                 emptyEventsText.visibility =
                     if (events.isEmpty()) View.VISIBLE else View.GONE
@@ -195,7 +214,6 @@ class ProfileActivity : ComponentActivity() {
 
     // Настройка кнопок профиля
     private fun setupButtons() {
-        // МЕНЯЕМ Button НА View !!!
         val btnEditProfile = findViewById<View>(R.id.editProfileButton)
 
         btnEditProfile.setOnClickListener {

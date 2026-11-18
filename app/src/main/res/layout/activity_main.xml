@@ -78,15 +78,6 @@
                     android:text="Мои активности"
                     android:textColor="#20243A"
                     android:textSize="18sp" />
-
-                <TextView
-                    android:id="@+id/myActivitiesAll"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Все"
-                    android:fontFamily="@font/geist_semibold"
-                    android:textColor="#3B66B0"
-                    android:textSize="14sp" />
             </LinearLayout>
 
             <com.google.android.material.card.MaterialCardView
@@ -142,7 +133,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Мероприятий"
+                            android:text="Учавствую"
                             android:textColor="#777B8A"
                             android:textSize="13sp"
                             android:fontFamily="@font/geist_regular"/>
@@ -428,6 +419,7 @@
             </LinearLayout>
 
             <TextView
+                android:visibility="gone"
                 android:fontFamily="@font/geist_semibold"
                 android:id="@+id/activitiesTitle"
                 android:layout_width="match_parent"

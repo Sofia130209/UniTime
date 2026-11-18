@@ -33,7 +33,6 @@ object BottomNavigationHelper {
             val targetActivity = when (item.itemId) {
                 R.id.nav_home -> MainActivity::class.java
                 R.id.nav_profile -> ProfileActivity::class.java
-                R.id.nav_activities -> return@setOnItemSelectedListener true
                 else -> return@setOnItemSelectedListener false
             }
 

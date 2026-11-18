@@ -12,7 +12,8 @@ import com.example.unitime.data.local.model.User
 @Database(
     entities = [
         User::class,
-    ], version = 1
+    ],
+    version = 2 // <--- БЫЛО 1, СТАЛО 2
 )
 abstract class UsersDb : RoomDatabase() {
     abstract fun getUsersDao(): UsersDao
