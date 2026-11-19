@@ -11,12 +11,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.unitime.R
-import com.example.unitime.data.local.db.auth.UsersDbProvider
-import com.example.unitime.data.local.db.events.EventsDbProvider
 import com.example.unitime.data.local.model.Event
+import com.example.unitime.data.local.model.User
 import com.example.unitime.data.managers.SessionManager
-import com.example.unitime.data.repo.EventParticipantRepository
-import com.example.unitime.data.repo.JoinResult
+import com.example.unitime.data.remote.RetrofitClient
 import com.example.unitime.ui.auth.ProfileActivity
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -27,14 +25,10 @@ class EventDetailsActivity : AppCompatActivity() {
 
     private var isJoined = false
     private var eventId: Long = -1L
-
-    private lateinit var participantRepository: EventParticipantRepository
-    private var userLogin: String? = null
+    private var currentUserLogin: String? = null
 
     private lateinit var joinButton: Button
     private lateinit var participantsText: TextView
-
-    // НОВОЕ: Переменные для списка участников
     private lateinit var rvParticipants: RecyclerView
     private lateinit var participantAdapter: ParticipantAdapter
 
@@ -42,8 +36,8 @@ class EventDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_details)
 
+        // 1. Получаем данные из Intent
         eventId = intent.getLongExtra(EXTRA_ID, -1L)
-
         if (eventId == -1L) {
             finish()
             return
@@ -56,147 +50,118 @@ class EventDetailsActivity : AppCompatActivity() {
         val location = intent.getStringExtra(EXTRA_LOCATION) ?: ""
         val limit = intent.getIntExtra(EXTRA_PARTICIPANTS, 0)
 
-        val titleText = findViewById<TextView>(R.id.detailTitle)
-        val descriptionText = findViewById<TextView>(R.id.detailDescription)
-        val categoryText = findViewById<TextView>(R.id.detailCategory)
-        val dateText = findViewById<TextView>(R.id.detailDate)
-        val locationText = findViewById<TextView>(R.id.detailLocation)
+        // 2. Находим View элементы и заполняем их
+        findViewById<TextView>(R.id.detailTitle).text = title
+        findViewById<TextView>(R.id.detailDescription).text = if (description.isBlank()) "Описание не добавлено." else description
+        findViewById<TextView>(R.id.detailCategory).text = category
+
+        val dateFormatter = SimpleDateFormat("EEEE, dd MMMM, HH:mm", Locale.getDefault())
+        findViewById<TextView>(R.id.detailDate).text = dateFormatter.format(Date(date))
+        findViewById<TextView>(R.id.detailLocation).text = location
 
         participantsText = findViewById(R.id.detailParticipants)
         joinButton = findViewById(R.id.detailJoinButton)
+        findViewById<TextView>(R.id.backButton).setOnClickListener { finish() }
 
-        // НОВОЕ: Инициализация RecyclerView для участников
+        // 3. Настраиваем RecyclerView для участников
         rvParticipants = findViewById(R.id.rvParticipantsList)
         rvParticipants.layoutManager = LinearLayoutManager(this)
 
-        val backButton = findViewById<TextView>(R.id.backButton)
-        backButton.setOnClickListener {
-            finish()
-        }
+        // 4. Получаем логин текущего пользователя
+        currentUserLogin = SessionManager(this).userLogin
 
-        titleText.text = title
-        descriptionText.text =
-            if (description.isBlank()) "Описание не добавлено." else description
-        categoryText.text = category
+        // 5. Загружаем участников с сервера
+        loadParticipantsFromServer(limit)
 
-        val dateFormatter = SimpleDateFormat(
-            "EEEE, dd MMMM, HH:mm",
-            Locale.getDefault()
-        )
-        dateText.text = dateFormatter.format(Date(date))
-
-        locationText.text = location
-
-        val session = SessionManager(this)
-        userLogin = session.userLogin
-
-        val eventsDb = EventsDbProvider.get(this)
-        val usersDb = UsersDbProvider.get(this)
-
-        participantRepository = EventParticipantRepository(
-            eventsDb.getEventParticipantDao(),
-            usersDb.getUsersDao()
-        )
-
-        lifecycleScope.launch {
-            participantRepository.observeParticipantCount(eventId).collect { count ->
-                participantsText.text = "$count/$limit человека"
-                // НОВОЕ: При изменении количества обновляем и список
-                loadParticipantsList()
-            }
-        }
-
-        lifecycleScope.launch {
-            val login = userLogin ?: return@launch
-
-            isJoined = participantRepository.hasJoined(eventId, login)
-            updateJoinButton()
-        }
-
+        // 6. Обработчик кнопки "Присоединиться / Отменить запись"
         joinButton.setOnClickListener {
+            val login = currentUserLogin
+            if (login == null) {
+                Toast.makeText(this, "Ошибка авторизации", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            joinButton.isEnabled = false
+            joinButton.text = "Загрузка..."
+
             lifecycleScope.launch {
-                val login = userLogin
-
-                if (login == null) {
-                    Toast.makeText(
-                        this@EventDetailsActivity,
-                        "Не удалось определить пользователя",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@launch
-                }
-
-                if (isJoined) {
-                    participantRepository.leaveEvent(eventId, login)
-                    isJoined = false
-                    updateJoinButton()
-
-                    Toast.makeText(
-                        this@EventDetailsActivity,
-                        "Вы отменили запись",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                } else {
-                    when (participantRepository.joinEvent(eventId, login)) {
-
-                        JoinResult.SUCCESS -> {
+                try {
+                    if (!isJoined) {
+                        // Записываемся на мероприятие
+                        val response = RetrofitClient.api.joinEvent(eventId, login)
+                        if (response.isSuccessful) {
                             isJoined = true
-                            updateJoinButton()
-
-                            Toast.makeText(
-                                this@EventDetailsActivity,
-                                "Вы записались на мероприятие!",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                            Toast.makeText(this@EventDetailsActivity, "Вы записались!", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@EventDetailsActivity, "Не удалось записаться", Toast.LENGTH_SHORT).show()
                         }
-
-                        JoinResult.ALREADY_JOINED -> {
-                            isJoined = true
-                            updateJoinButton()
-                        }
-
-                        JoinResult.FULL -> {
-                            Toast.makeText(
-                                this@EventDetailsActivity,
-                                "Свободных мест больше нет",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-
-                        JoinResult.USER_NOT_FOUND -> {
-                            Toast.makeText(
-                                this@EventDetailsActivity,
-                                "Пользователь не найден",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                    } else {
+                        // Отменяем запись
+                        val response = RetrofitClient.api.leaveEvent(eventId, login)
+                        if (response.isSuccessful) {
+                            isJoined = false
+                            Toast.makeText(this@EventDetailsActivity, "Запись отменена", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@EventDetailsActivity, "Не удалось отменить запись", Toast.LENGTH_SHORT).show()
                         }
                     }
+                    // Перезагружаем список участников и обновляем кнопку
+                    loadParticipantsFromServer(limit)
+                } catch (e: Exception) {
+                    Toast.makeText(this@EventDetailsActivity, "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
+                } finally {
+                    joinButton.isEnabled = true
+                    updateJoinButtonText()
                 }
             }
         }
-
-        // НОВОЕ: Первичная загрузка списка участников при открытии экрана
-        loadParticipantsList()
     }
 
-    // НОВОЕ: Функция загрузки списка участников
-    private fun loadParticipantsList() {
+    private fun loadParticipantsFromServer(limit: Int) {
         lifecycleScope.launch {
-            val participants = participantRepository.getParticipantsList(eventId)
-            participantAdapter = ParticipantAdapter(participants) { selectedUser ->
-                val intent = Intent(this@EventDetailsActivity, ProfileActivity::class.java).apply {
-                    putExtra(ProfileActivity.EXTRA_USER_LOGIN, selectedUser.login)
+            try {
+                val response = RetrofitClient.api.getEventParticipants(eventId)
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val serverParticipants = response.body()!!.participants
+
+                    val localUsers = serverParticipants.map { dto ->
+                        User(
+                            login = dto.login ?: "",
+                            name = dto.name ?: "",
+                            surname = dto.surname ?: "",
+                            email = dto.email ?: "",
+                            password = "",
+                            avatarPath = dto.avatarUrl
+                        )
+                    }
+
+                    // Проверяем, записан ли текущий пользователь
+                    isJoined = localUsers.any { it.login == currentUserLogin }
+                    updateJoinButtonText()
+
+                    // Устанавливаем адаптер
+                    participantAdapter = ParticipantAdapter(localUsers) { selectedUser ->
+                        val intent = Intent(this@EventDetailsActivity, ProfileActivity::class.java).apply {
+                            putExtra(ProfileActivity.EXTRA_USER_LOGIN, selectedUser.login)
+                        }
+                        startActivity(intent)
+                    }
+                    rvParticipants.adapter = participantAdapter
+
+                    // Обновляем счетчик
+                    participantsText.text = "Участники: ${localUsers.size}/$limit"
+                } else {
+                    participantsText.text = "Не удалось загрузить участников"
                 }
-                startActivity(intent)
+            } catch (e: Exception) {
+                participantsText.text = "Ошибка сети"
+                e.printStackTrace()
             }
-            rvParticipants.adapter = participantAdapter
         }
     }
 
-    private fun updateJoinButton() {
-        joinButton.text =
-            if (isJoined) "Отменить запись" else "Присоединиться"
+    private fun updateJoinButtonText() {
+        joinButton.text = if (isJoined) "Отменить запись" else "Присоединиться"
     }
 
     companion object {

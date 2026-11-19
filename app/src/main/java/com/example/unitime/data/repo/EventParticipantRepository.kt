@@ -5,8 +5,6 @@ import com.example.unitime.data.local.db.auth.UsersDao
 import com.example.unitime.data.local.model.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 enum class JoinResult {
@@ -25,13 +23,8 @@ class EventParticipantRepository(
         return participantDao.observeParticipantCount(eventId)
     }
 
-    fun observeJoinedEventsCount(userLogin: String): Flow<Int> = flow {
-        val user = usersDao.getUserByLogin(userLogin)
-        if (user != null) {
-            emitAll(participantDao.observeJoinedEventsCount(user.id))
-        } else {
-            emit(0)
-        }
+    fun observeJoinedEventsCount(userLogin: String): Flow<Int> {
+        return participantDao.observeJoinedEventsCount(userLogin)
     }
 
     suspend fun joinEvent(
@@ -41,21 +34,17 @@ class EventParticipantRepository(
         val user = usersDao.getUserByLogin(userLogin)
             ?: return JoinResult.USER_NOT_FOUND
 
-        if (participantDao.isParticipant(eventId, user.id)) {
+        if (participantDao.hasJoined(eventId, userLogin) > 0) {
             return JoinResult.ALREADY_JOINED
         }
 
-        val joined = participantDao.joinIfAvailable(eventId, user.id)
-
-        if (joined) return JoinResult.SUCCESS
-
-        val count = participantDao.getParticipantCount(eventId)
-        val limit = participantDao.getParticipantLimit(eventId) ?: 0
-
-        return if (count >= limit) {
-            JoinResult.FULL
-        } else {
-            JoinResult.ALREADY_JOINED
+        // Простая вставка без сложной проверки лимита в DAO,
+        // так как мы убрали joinIfAvailable из интерфейса DAO для простоты
+        try {
+            participantDao.insert(com.example.unitime.data.local.model.EventParticipant(eventId = eventId, userLogin = userLogin))
+            return JoinResult.SUCCESS
+        } catch (e: Exception) {
+            return JoinResult.ALREADY_JOINED
         }
     }
 
@@ -63,29 +52,21 @@ class EventParticipantRepository(
         eventId: Long,
         userLogin: String
     ) {
-        val user = usersDao.getUserByLogin(userLogin) ?: return
-        participantDao.leaveEvent(eventId, user.id)
+        participantDao.delete(eventId, userLogin)
     }
 
     suspend fun hasJoined(
         eventId: Long,
         userLogin: String
     ): Boolean {
-        val user = usersDao.getUserByLogin(userLogin)
-            ?: return false
-
-        return participantDao.isParticipant(eventId, user.id)
+        return participantDao.hasJoined(eventId, userLogin) > 0
     }
 
-    // НОВОЕ: Получаем список участников мероприятия
     suspend fun getParticipantsList(eventId: Long): List<User> {
         return withContext(Dispatchers.IO) {
-            // 1. Получаем ID участников из EventsDb
-            val userIds = participantDao.getUserIdsForEvent(eventId)
-
-            // 2. Для каждого ID запрашиваем полные данные из UsersDb
-            userIds.mapNotNull { userId ->
-                usersDao.getUserById(userId)
+            val logins = participantDao.getUserLoginsForEvent(eventId)
+            logins.mapNotNull { login ->
+                usersDao.getUserByLogin(login)
             }
         }
     }

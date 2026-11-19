@@ -202,7 +202,6 @@ class ProfileActivity : ComponentActivity() {
     }
 
     companion object {
-        // Ключ для передачи логина через Intent
         const val EXTRA_USER_LOGIN = "extra_user_login"
     }
 }

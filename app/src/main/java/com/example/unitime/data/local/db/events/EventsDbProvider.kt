@@ -1,39 +1,26 @@
-package com.example.unitime.data.local.db.events
+package com.example.unitime.data.local.db.events // Проверьте ваш пакет
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
-import com.example.unitime.data.local.db.tags.PrepopulateTagsCallback
+import androidx.room.RoomDatabase
 
+// Если у вас есть отдельный объект-провайдер, он должен выглядеть так:
 object EventsDbProvider {
-
     @Volatile
-    private var instance: EventsDb? = null
+    private var INSTANCE: EventsDb? = null
 
-    val MIGRATION_5_6 = object : Migration(5, 6) {
-        override fun migrate(db: SupportSQLiteDatabase) {
-            db.execSQL(
-                """
-            ALTER TABLE events
-            ADD COLUMN created_by_login TEXT NOT NULL DEFAULT ''
-            """
-            )
-        }
-    }
-
-    fun get(context: Context): EventsDb =
-        instance ?: synchronized(this) {
-            instance ?: Room.databaseBuilder(
+    fun get(context: Context): EventsDb {
+        return INSTANCE ?: synchronized(this) {
+            val instance = Room.databaseBuilder(
                 context.applicationContext,
                 EventsDb::class.java,
-                "events_database"
+                "events_database" // Имя вашей БД
             )
-                .addMigrations(MIGRATION_5_6)
-                .addCallback(
-                    PrepopulateTagsCallback(context.applicationContext)
-                )
+                // ВАЖНО: Эта строка решает проблему миграции, позволяя пересоздать БД при изменении версии
+                .fallbackToDestructiveMigration()
                 .build()
-                .also { instance = it }
+            INSTANCE = instance
+            instance
         }
+    }
 }

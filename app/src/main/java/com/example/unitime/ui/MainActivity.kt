@@ -50,39 +50,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val session = SessionManager(this)
         if (!session.isLoggedIn) {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
             return
         }
-        lifecycleScope.launch {
-            try {
-                // Делаем запрос к серверу
-                val users = RetrofitClient.api.getAllUsers()
 
-                Toast.makeText(
-                    this@MainActivity,
-                    "Успех!",
-                    Toast.LENGTH_LONG
-                ).show()
-
-            } catch (e: Exception) {
-                // Если ошибка, показываем её текст
-                Toast.makeText(
-                    this@MainActivity,
-                    "Ошибка: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
-                e.printStackTrace()
-            }
-        }
-        // -------------------------------
         enableEdgeToEdge()
-        // 1. Сначала устанавливаем разметку!
         setContentView(R.layout.activity_main)
 
-        // 2. Только теперь ищем элементы
         val tvCreatedCount = findViewById<TextView>(R.id.tvCreatedCount)
         val tvJoinedCount = findViewById<TextView>(R.id.tvJoinedCount)
 
@@ -92,14 +70,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val db = EventsDbProvider.get(this)
-
-        val repository = EventRepository(
-            db.getEventsDao(),
-            db.getTagDao()
-        )
-
+        val repository = EventRepository(db.getEventsDao(), db.getTagDao())
         val usersDb = UsersDbProvider.get(this)
-
         val participantRepository = EventParticipantRepository(
             db.getEventParticipantDao(),
             usersDb.getUsersDao()
@@ -107,16 +79,13 @@ class MainActivity : AppCompatActivity() {
 
         val userLogin = session.userLogin
 
-        // 3. Настраиваем счетчики
+        // Настраиваем счетчики
         if (userLogin != null) {
-            // Счетчик созданных событий
             lifecycleScope.launch {
                 db.getEventsDao().observeCreatedCount(userLogin).collect { count ->
                     tvCreatedCount.text = count.toString()
                 }
             }
-
-            // Счетчик событий, на которые записан пользователь
             lifecycleScope.launch {
                 participantRepository.observeJoinedEventsCount(userLogin).collect { count ->
                     tvJoinedCount.text = count.toString()
@@ -128,8 +97,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val recycler = findViewById<RecyclerView>(R.id.activitiesRecyclerView)
-
         lateinit var adapter: EventAdapter
+
         adapter = EventAdapter(
             onEventClick = { event ->
                 val intent = EventDetailsActivity.newIntent(this, event)
@@ -137,70 +106,37 @@ class MainActivity : AppCompatActivity() {
             },
             onJoinClick = { event ->
                 lifecycleScope.launch {
-                    val login = userLogin
-
-                    if (login == null) {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Не удалось определить пользователя",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@launch
-                    }
+                    val login = userLogin ?: return@launch
 
                     if (adapter.isJoined(event.id)) {
-                        // Отмена записи
                         participantRepository.leaveEvent(event.id, login)
                         adapter.markNotJoined(event.id)
-
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Вы отменили запись",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this@MainActivity, "Вы отменили запись", Toast.LENGTH_SHORT).show()
                     } else {
-                        // Запись на мероприятие
                         when (participantRepository.joinEvent(event.id, login)) {
                             JoinResult.SUCCESS -> {
                                 adapter.markJoined(event.id)
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Вы записались на мероприятие!",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(this@MainActivity, "Вы записались на мероприятие!", Toast.LENGTH_SHORT).show()
                             }
-
                             JoinResult.ALREADY_JOINED -> {
                                 adapter.markJoined(event.id)
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Вы уже записаны",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(this@MainActivity, "Вы уже записаны", Toast.LENGTH_SHORT).show()
                             }
-
                             JoinResult.FULL -> {
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Свободных мест больше нет",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(this@MainActivity, "Свободных мест больше нет", Toast.LENGTH_SHORT).show()
                             }
-
                             JoinResult.USER_NOT_FOUND -> {
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "Пользователь не найден",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(this@MainActivity, "Пользователь не найден", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
                 }
             }
         )
+
         recycler.layoutManager = LinearLayoutManager(this)
         recycler.adapter = adapter
+
         val participantJobs = mutableListOf<Job>()
 
         fun observeParticipantStates(events: List<Event>) {
@@ -210,11 +146,9 @@ class MainActivity : AppCompatActivity() {
             events.forEach { event ->
                 participantJobs.add(
                     lifecycleScope.launch {
-                        participantRepository
-                            .observeParticipantCount(event.id)
-                            .collect { count ->
-                                adapter.updateParticipantCount(event.id, count)
-                            }
+                        participantRepository.observeParticipantCount(event.id).collect { count ->
+                            adapter.updateParticipantCount(event.id, count)
+                        }
                     }
                 )
                 participantJobs.add(
@@ -235,24 +169,62 @@ class MainActivity : AppCompatActivity() {
         val emptyView = findViewById<View>(R.id.emptyView)
         var eventsJob: Job? = null
 
+        // === ГЛАВНОЕ ИЗМЕНЕНИЕ: Загрузка из облака с фоллбэком на локальную БД ===
         fun showAllEvents() {
             eventsJob?.cancel()
 
             eventsJob = lifecycleScope.launch {
-                repository.observeUpcoming().collect { events ->
-                    adapter.submitList(events) {
-                        observeParticipantStates(events)
-                    }
+                try {
+                    // 1. Пытаемся загрузить события из облака
+                    val response = RetrofitClient.api.getAllEvents()
 
-                    emptyView.visibility =
-                        if (events.isEmpty()) View.VISIBLE else View.GONE
+                    if (response.isSuccessful && response.body() != null) {
+                        val cloudEvents = response.body()!!
+
+                        // 2. Преобразуем DTO с сервера в локальные модели
+                        val localEvents = cloudEvents.map { dto ->
+                            Event(
+                                id = dto.id,
+                                activityTitle = dto.activityTitle,
+                                activityDescription = dto.activityDescription ?: "",
+                                activityCategory = dto.activityCategory,
+                                activityDate = dto.activityDate,
+                                activityLocation = dto.activityLocation ?: "",
+                                activityParticipants = dto.activityParticipants,
+                                createdByLogin = dto.createdByLogin ?: ""
+                            )
+                        }
+
+                        // 3. Показываем в адаптере
+                        adapter.submitList(localEvents) {
+                            observeParticipantStates(localEvents)
+                        }
+                        emptyView.visibility = if (localEvents.isEmpty()) View.VISIBLE else View.GONE
+
+                    } else {
+                        // Если сервер вернул ошибку, показываем локальные данные
+                        repository.observeUpcoming().collect { events ->
+                            adapter.submitList(events) {
+                                observeParticipantStates(events)
+                            }
+                            emptyView.visibility = if (events.isEmpty()) View.VISIBLE else View.GONE
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Если нет интернета, показываем локальные данные
+                    repository.observeUpcoming().collect { events ->
+                        adapter.submitList(events) {
+                            observeParticipantStates(events)
+                        }
+                        emptyView.visibility = if (events.isEmpty()) View.VISIBLE else View.GONE
+                    }
                 }
             }
         }
 
         fun filterByTag(tagName: String) {
             eventsJob?.cancel()
-
+            // Для фильтрации пока используем локальную БД (можно доработать под сервер при необходимости)
             eventsJob = lifecycleScope.launch {
                 val tagId = repository.findTagIdByName(tagName)
 
@@ -268,35 +240,22 @@ class MainActivity : AppCompatActivity() {
                     adapter.submitList(events) {
                         observeParticipantStates(events)
                     }
-
-                    emptyView.visibility =
-                        if (events.isEmpty()) View.VISIBLE else View.GONE
+                    emptyView.visibility = if (events.isEmpty()) View.VISIBLE else View.GONE
                 }
             }
         }
+
         filterByTagHandler = ::filterByTag
         showAllEventsHandler = ::showAllEvents
 
-        findViewById<View>(R.id.categorySport).setOnClickListener {
-            filterByTag("спорт")
-        }
-
-        findViewById<View>(R.id.categoryMeetings).setOnClickListener {
-            filterByTag("встречи")
-        }
-
-        findViewById<View>(R.id.categoryStudy).setOnClickListener {
-            filterByTag("учёба")
-        }
-
-        findViewById<View>(R.id.categoryOther).setOnClickListener {
-            filterByTag("другое")
-        }
+        findViewById<View>(R.id.categorySport).setOnClickListener { filterByTag("спорт") }
+        findViewById<View>(R.id.categoryMeetings).setOnClickListener { filterByTag("встречи") }
+        findViewById<View>(R.id.categoryStudy).setOnClickListener { filterByTag("учёба") }
+        findViewById<View>(R.id.categoryOther).setOnClickListener { filterByTag("другое") }
         findViewById<View>(R.id.categoriesAll).setOnClickListener {
-            categoryLauncher.launch(
-                Intent(this, CategoriesActivity::class.java)
-            )
+            categoryLauncher.launch(Intent(this, CategoriesActivity::class.java))
         }
+
         showAllEvents()
     }
 

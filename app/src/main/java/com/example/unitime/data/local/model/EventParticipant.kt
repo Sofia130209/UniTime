@@ -2,28 +2,18 @@ package com.example.unitime.data.local.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.ForeignKey
-import androidx.room.Index
 
 @Entity(
-    tableName = "event_participants",
-    primaryKeys = ["event_id", "user_id"],
-    foreignKeys = [
-        ForeignKey(
-            entity = Event::class,
-            parentColumns = [Event.ID_COLUMN],
-            childColumns = ["event_id"],
-            onDelete = ForeignKey.CASCADE
-        )
-    ],
-    indices = [
-        Index(value = ["user_id"])
-    ]
+    tableName = EventParticipant.TABLE_NAME,
+    primaryKeys = [EventParticipant.EVENT_ID_COLUMN, EventParticipant.USER_LOGIN_COLUMN]
 )
 data class EventParticipant(
-    @ColumnInfo(name = "event_id")
-    val eventId: Long,
-
-    @ColumnInfo(name = "user_id")
-    val userId: Long
-)
+    @ColumnInfo(name = EventParticipant.EVENT_ID_COLUMN) val eventId: Long,
+    @ColumnInfo(name = EventParticipant.USER_LOGIN_COLUMN) val userLogin: String
+) {
+    companion object {
+        const val TABLE_NAME = "event_participants"
+        const val EVENT_ID_COLUMN = "event_id"
+        const val USER_LOGIN_COLUMN = "user_login"
+    }
+}

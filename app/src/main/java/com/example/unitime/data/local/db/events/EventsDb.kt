@@ -9,9 +9,9 @@ import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.room.Update
+import com.example.unitime.data.local.dao.EventParticipantDao // Импорт DAO участников
 import com.example.unitime.data.local.model.Event
 import com.example.unitime.data.local.model.EventParticipant
-import com.example.unitime.data.local.dao.EventParticipantDao
 import com.example.unitime.data.local.model.EventTagCrossRef
 import com.example.unitime.data.local.model.EventWithTags
 import com.example.unitime.data.local.model.Tag
@@ -22,9 +22,10 @@ import kotlinx.coroutines.flow.Flow
         Event::class,
         EventTagCrossRef::class,
         Tag::class,
-        EventParticipant::class
+        EventParticipant::class // Таблица участников добавлена в схему
     ],
-    version = 6
+    version = 7, // Версия увеличена
+    exportSchema = false // Отключаем экспорт схемы, чтобы убрать предупреждение
 )
 abstract class EventsDb : RoomDatabase() {
     abstract fun getEventsDao(): EventsDao
@@ -36,8 +37,10 @@ abstract class EventsDb : RoomDatabase() {
 interface EventsDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(event: Event): Long
+
     @Query("SELECT COUNT(*) FROM ${Event.TABLE_NAME} WHERE ${Event.CREATED_BY_LOGIN} = :login")
     fun observeCreatedCount(login: String?): Flow<Int>
+
     @Update suspend fun update(event: Event)
     @Delete suspend fun delete(event: Event)
 
@@ -45,10 +48,7 @@ interface EventsDao {
     suspend fun getById(id: Long): Event?
 
     @Transaction
-    @Query("""
-        SELECT * FROM ${Event.TABLE_NAME}
-        WHERE ${Event.ID_COLUMN} = :id
-    """)
+    @Query("SELECT * FROM ${Event.TABLE_NAME} WHERE ${Event.ID_COLUMN} = :id")
     suspend fun getWithTags(id: Long): EventWithTags?
 
     @Transaction
@@ -108,14 +108,14 @@ interface EventsDao {
     SELECT * FROM ${Event.TABLE_NAME}
     WHERE ${Event.CREATED_BY_LOGIN} = :login
     ORDER BY ${Event.ACTIVITY_DATE} ASC
-""")
+    """)
     fun observeCreatedByUser(login: String?): Flow<List<Event>>
 }
 
 @Dao
 interface TagDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(tag: Tag): Long // * вернёт -1, если такой name уже есть
+    suspend fun insert(tag: Tag): Long
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(tags: List<Tag>)

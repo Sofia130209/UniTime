@@ -127,51 +127,49 @@ class AddEventActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val db = EventsDbProvider.get(applicationContext)
-
-                val repository = EventRepository(
-                    db.getEventsDao(),
-                    db.getTagDao()
-                )
-
                 val session = SessionManager(this@AddEventActivity)
                 val login = session.userLogin ?: ""
 
-                val event = Event(
-                    activityTitle = title,
-                    activityDescription = description,
-                    activityCategory = category,
-                    activityDate = millis,
-                    activityLocation = location,
-                    activityParticipants = maxParticipants,
+                // 1. ОТПРАВЛЯЕМ МЕРОПРИЯТИЕ НА СЕРВЕР
+                val response = com.example.unitime.data.remote.RetrofitClient.api.createEvent(
+                    title = title,
+                    description = description,
+                    category = category,
+                    date = millis,
+                    location = location,
+                    participantsLimit = maxParticipants,
                     createdByLogin = login
                 )
 
-                // Создаём событие вместе с его тегом
-                repository.createEvent(
-                    event = event,
-                    tagNames = listOf(category)
-                )
+                if (response.isSuccessful && response.body()?.success == true) {
+                    // 2. Если сервер принял, сохраняем локально (для мгновенного отображения)
+                    val db = EventsDbProvider.get(applicationContext)
+                    val repository = EventRepository(db.getEventsDao(), db.getTagDao())
 
-                Toast.makeText(
-                    this@AddEventActivity,
-                    "Активность создана",
-                    Toast.LENGTH_SHORT
-                ).show()
+                    val event = Event(
+                        activityTitle = title,
+                        activityDescription = description,
+                        activityCategory = category,
+                        activityDate = millis,
+                        activityLocation = location,
+                        activityParticipants = maxParticipants,
+                        createdByLogin = login
+                    )
 
-                val intent = Intent(
-                    this@AddEventActivity,
-                    MainActivity::class.java
-                )
-                startActivity(intent)
+                    repository.createEvent(event = event, tagNames = listOf(category))
+
+                    Toast.makeText(this@AddEventActivity, "Активность создана и сохранена в облаке!", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this@AddEventActivity, MainActivity::class.java))
+                    finish()
+                } else {
+                    Toast.makeText(this@AddEventActivity, "Ошибка сервера: ${response.body()?.error}", Toast.LENGTH_LONG).show()
+                    isSaving = false
+                    createButton.isEnabled = true
+                }
             } catch (e: Exception) {
                 isSaving = false
                 createButton.isEnabled = true
-                Toast.makeText(
-                    this@AddEventActivity,
-                    "Не удалось создать: ${e.message ?: "ошибка"}",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(this@AddEventActivity, "Ошибка сети: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
