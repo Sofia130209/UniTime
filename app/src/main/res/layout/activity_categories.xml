@@ -6,7 +6,16 @@
     android:layout_height="match_parent"
     android:background="@color/background"
     android:fitsSystemWindows="true">
-
+    <ImageView
+        android:layout_marginTop="50dp"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
@@ -17,6 +26,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
+            android:rotation="180"
             android:id="@+id/backButton"
             android:layout_width="44dp"
             android:layout_height="44dp"

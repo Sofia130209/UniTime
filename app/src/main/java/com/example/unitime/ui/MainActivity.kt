@@ -56,7 +56,6 @@ class MainActivity : AppCompatActivity() {
             finish()
             return
         }
-        // --- ТЕСТ СВЯЗИ С СЕРВЕРОМ ---
         lifecycleScope.launch {
             try {
                 // Делаем запрос к серверу
@@ -76,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                     "Ошибка: ${e.message}",
                     Toast.LENGTH_LONG
                 ).show()
-                e.printStackTrace() // Выведет подробности в Logcat
+                e.printStackTrace()
             }
         }
         // -------------------------------

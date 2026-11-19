@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     // ⚠️ Замените на URL вашего API на Hoster.by
-    private const val BASE_URL = "http://87.232.71.96:3000/"
+    private const val BASE_URL = "http://87.232.71.96:22/"
 
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
