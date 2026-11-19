@@ -55,7 +55,6 @@ interface EventsDao {
     @Query("SELECT * FROM ${Event.TABLE_NAME} ORDER BY ${Event.ACTIVITY_DATE} ASC")
     fun observeAllWithTags(): Flow<List<EventWithTags>>
 
-    // * «активности с конкретным тегом»
     @Transaction
     @Query("""
     SELECT e.* FROM ${Event.TABLE_NAME} e
@@ -101,7 +100,6 @@ interface EventsDao {
     """)
     fun observeUpcoming(now: Long = System.currentTimeMillis()): Flow<List<EventWithTags>>
 
-    // * «все активности» (без фильтра по дате)
     @Transaction
     @Query("SELECT * FROM ${Event.TABLE_NAME} ORDER BY ${Event.ACTIVITY_DATE} ASC")
     fun observeAll(): Flow<List<EventWithTags>>

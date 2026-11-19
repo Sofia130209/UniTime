@@ -22,7 +22,6 @@ abstract class UsersDb : RoomDatabase() {
 
 @Dao
 interface UsersDao {
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(user: User): Long
 
@@ -32,6 +31,9 @@ interface UsersDao {
     @Query("SELECT * FROM users WHERE login = :login LIMIT 1")
     suspend fun getUserByLogin(login: String): User?
 
+    // НОВОЕ: Получение пользователя по ID
+    @Query("SELECT * FROM users WHERE id = :id LIMIT 1")
+    suspend fun getUserById(id: Long): com.example.unitime.data.local.model.User?
     @Query("""
         SELECT EXISTS(
             SELECT 1 FROM users

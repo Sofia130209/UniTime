@@ -2,10 +2,12 @@ package com.example.unitime.data.repo
 
 import com.example.unitime.data.local.dao.EventParticipantDao
 import com.example.unitime.data.local.db.auth.UsersDao
+import com.example.unitime.data.local.model.User
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.withContext
 
 enum class JoinResult {
     SUCCESS,
@@ -26,10 +28,8 @@ class EventParticipantRepository(
     fun observeJoinedEventsCount(userLogin: String): Flow<Int> = flow {
         val user = usersDao.getUserByLogin(userLogin)
         if (user != null) {
-            // Получаем Flow из DAO и передаем его наверх
             emitAll(participantDao.observeJoinedEventsCount(user.id))
         } else {
-            // Если пользователь не найден, возвращаем 0
             emit(0)
         }
     }
@@ -75,5 +75,18 @@ class EventParticipantRepository(
             ?: return false
 
         return participantDao.isParticipant(eventId, user.id)
+    }
+
+    // НОВОЕ: Получаем список участников мероприятия
+    suspend fun getParticipantsList(eventId: Long): List<User> {
+        return withContext(Dispatchers.IO) {
+            // 1. Получаем ID участников из EventsDb
+            val userIds = participantDao.getUserIdsForEvent(eventId)
+
+            // 2. Для каждого ID запрашиваем полные данные из UsersDb
+            userIds.mapNotNull { userId ->
+                usersDao.getUserById(userId)
+            }
+        }
     }
 }

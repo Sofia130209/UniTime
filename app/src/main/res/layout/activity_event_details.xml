@@ -134,7 +134,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="📅  Дата и время"
+                        android:text="Дата и время"
                         android:textColor="#555B70"
                         android:textSize="15sp"
                         android:fontFamily="@font/geist_regular" />
@@ -144,7 +144,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="📍  Место проведения"
+                        android:text="Место проведения"
                         android:textColor="#555B70"
                         android:textSize="15sp"
                         android:fontFamily="@font/geist_regular" />
@@ -154,11 +154,28 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="12dp"
-                        android:text="👥  3 из 8 участников"
+                        android:text="3 из 8 участников"
                         android:textColor="#555B70"
                         android:textSize="15sp"
                         android:fontFamily="@font/geist_regular" />
 
+                    <!-- НОВЫЙ СПИСОК УЧАСТНИКОВ -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Участники:"
+                        android:textColor="#20243A"
+                        android:textStyle="bold"
+                        android:fontFamily="@font/geist_semibold"
+                        android:layout_marginTop="14dp"
+                        android:textSize="18sp" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvParticipantsList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:nestedScrollingEnabled="false" /> <!-- nestedScrollingEnabled false важен, если внутри ScrollView -->
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

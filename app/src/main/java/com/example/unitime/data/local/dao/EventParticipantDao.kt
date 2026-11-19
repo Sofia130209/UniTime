@@ -10,35 +10,28 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EventParticipantDao {
+
     @Query("SELECT COUNT(DISTINCT event_id) FROM event_participants WHERE user_id = :userId")
     fun observeJoinedEventsCount(userId: Long): Flow<Int>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(participant: EventParticipant): Long
 
-    @Query("""
-        SELECT COUNT(*) FROM event_participants
-        WHERE event_id = :eventId
-    """)
+    @Query("SELECT COUNT(*) FROM event_participants WHERE event_id = :eventId")
     fun observeParticipantCount(eventId: Long): Flow<Int>
 
-    @Query("""
-        SELECT COUNT(*) FROM event_participants
-        WHERE event_id = :eventId
-    """)
+    @Query("SELECT COUNT(*) FROM event_participants WHERE event_id = :eventId")
     suspend fun getParticipantCount(eventId: Long): Int
 
     @Query("""
-    SELECT EXISTS(
-        SELECT 1 FROM event_participants
-        WHERE event_id = :eventId AND user_id = :userId
-    )
-""")
+        SELECT EXISTS(
+            SELECT 1 FROM event_participants
+            WHERE event_id = :eventId AND user_id = :userId
+        )
+    """)
     suspend fun isParticipant(eventId: Long, userId: Long): Boolean
 
-    @Query("""
-        SELECT activity_participants FROM events
-        WHERE id = :eventId
-    """)
+    @Query("SELECT activity_participants FROM events WHERE id = :eventId")
     suspend fun getParticipantLimit(eventId: Long): Int?
 
     @Transaction
@@ -61,4 +54,6 @@ interface EventParticipantDao {
         WHERE event_id = :eventId AND user_id = :userId
     """)
     suspend fun leaveEvent(eventId: Long, userId: Long)
+    @Query("SELECT user_id FROM event_participants WHERE event_id = :eventId")
+    suspend fun getUserIdsForEvent(eventId: Long): List<Long>
 }

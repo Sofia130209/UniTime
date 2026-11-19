@@ -61,10 +61,9 @@ class MainActivity : AppCompatActivity() {
                 // Делаем запрос к серверу
                 val users = RetrofitClient.api.getAllUsers()
 
-                // Если успешно, показываем сообщение
                 Toast.makeText(
                     this@MainActivity,
-                    "Успех! Пользователей с сервера: ${users.size}",
+                    "Успех!",
                     Toast.LENGTH_LONG
                 ).show()
 

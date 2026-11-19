@@ -351,12 +351,17 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Скрытый список событий (если он нужен в логике) -->
             <TextView
+                android:layout_marginTop="20dp"
                 android:id="@+id/emptyEventsText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Вы пока не создали ни одного мероприятия"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:textSize="14dp"
+                android:textColor="#6F20243A"
+                android:fontFamily="@font/geist_regular"
+                android:text="Нет ни одного мероприятия"
                 android:visibility="gone" />
 
             <androidx.recyclerview.widget.RecyclerView

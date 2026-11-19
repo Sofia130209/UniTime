@@ -8,6 +8,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.unitime.R
 import com.example.unitime.data.local.db.auth.UsersDbProvider
 import com.example.unitime.data.local.db.events.EventsDbProvider
@@ -15,6 +17,7 @@ import com.example.unitime.data.local.model.Event
 import com.example.unitime.data.managers.SessionManager
 import com.example.unitime.data.repo.EventParticipantRepository
 import com.example.unitime.data.repo.JoinResult
+import com.example.unitime.ui.auth.ProfileActivity
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -31,11 +34,14 @@ class EventDetailsActivity : AppCompatActivity() {
     private lateinit var joinButton: Button
     private lateinit var participantsText: TextView
 
+    // НОВОЕ: Переменные для списка участников
+    private lateinit var rvParticipants: RecyclerView
+    private lateinit var participantAdapter: ParticipantAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_event_details)
 
-        // Получаем данные мероприятия
         eventId = intent.getLongExtra(EXTRA_ID, -1L)
 
         if (eventId == -1L) {
@@ -50,7 +56,6 @@ class EventDetailsActivity : AppCompatActivity() {
         val location = intent.getStringExtra(EXTRA_LOCATION) ?: ""
         val limit = intent.getIntExtra(EXTRA_PARTICIPANTS, 0)
 
-        // Находим элементы интерфейса
         val titleText = findViewById<TextView>(R.id.detailTitle)
         val descriptionText = findViewById<TextView>(R.id.detailDescription)
         val categoryText = findViewById<TextView>(R.id.detailCategory)
@@ -60,12 +65,15 @@ class EventDetailsActivity : AppCompatActivity() {
         participantsText = findViewById(R.id.detailParticipants)
         joinButton = findViewById(R.id.detailJoinButton)
 
+        // НОВОЕ: Инициализация RecyclerView для участников
+        rvParticipants = findViewById(R.id.rvParticipantsList)
+        rvParticipants.layoutManager = LinearLayoutManager(this)
+
         val backButton = findViewById<TextView>(R.id.backButton)
         backButton.setOnClickListener {
             finish()
         }
 
-        // Заполняем экран
         titleText.text = title
         descriptionText.text =
             if (description.isBlank()) "Описание не добавлено." else description
@@ -79,7 +87,6 @@ class EventDetailsActivity : AppCompatActivity() {
 
         locationText.text = location
 
-        // Подключаем базы данных
         val session = SessionManager(this)
         userLogin = session.userLogin
 
@@ -91,14 +98,14 @@ class EventDetailsActivity : AppCompatActivity() {
             usersDb.getUsersDao()
         )
 
-        // Следим за количеством участников
         lifecycleScope.launch {
             participantRepository.observeParticipantCount(eventId).collect { count ->
                 participantsText.text = "$count/$limit человека"
+                // НОВОЕ: При изменении количества обновляем и список
+                loadParticipantsList()
             }
         }
 
-        // Проверяем, записан ли пользователь
         lifecycleScope.launch {
             val login = userLogin ?: return@launch
 
@@ -106,7 +113,6 @@ class EventDetailsActivity : AppCompatActivity() {
             updateJoinButton()
         }
 
-        // Запись или отмена записи
         joinButton.setOnClickListener {
             lifecycleScope.launch {
                 val login = userLogin
@@ -168,6 +174,23 @@ class EventDetailsActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+
+        // НОВОЕ: Первичная загрузка списка участников при открытии экрана
+        loadParticipantsList()
+    }
+
+    // НОВОЕ: Функция загрузки списка участников
+    private fun loadParticipantsList() {
+        lifecycleScope.launch {
+            val participants = participantRepository.getParticipantsList(eventId)
+            participantAdapter = ParticipantAdapter(participants) { selectedUser ->
+                val intent = Intent(this@EventDetailsActivity, ProfileActivity::class.java).apply {
+                    putExtra(ProfileActivity.EXTRA_USER_LOGIN, selectedUser.login)
+                }
+                startActivity(intent)
+            }
+            rvParticipants.adapter = participantAdapter
         }
     }
 
