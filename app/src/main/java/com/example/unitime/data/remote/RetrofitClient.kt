@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
 
+    // ✅ ИСПРАВЛЕННЫЙ URL (без /api/, так как PHP-скрипты лежат в корне)
     private const val BASE_URL = "http://87.232.69.164/"
 
     private val logging = HttpLoggingInterceptor().apply {

@@ -42,6 +42,7 @@ class EditProfileActivity : ComponentActivity() {
     private lateinit var avatarImageView: ImageView
 
     private var selectedImageUri: Uri? = null
+    private var oldAvatarPath: String? = null // Для удаления старой аватарки
 
     private val pickImageLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
@@ -68,7 +69,6 @@ class EditProfileActivity : ComponentActivity() {
         loginField = findViewById(R.id.editLogin)
         emailField = findViewById(R.id.editEmail)
 
-        // ИНИЦИАЛИЗАЦИЯ НОВЫХ ПОЛЕЙ
         telegramField = findViewById(R.id.editTelegram)
         phoneField = findViewById(R.id.editPhone)
 
@@ -104,11 +104,7 @@ class EditProfileActivity : ComponentActivity() {
             }
 
             if (user == null) {
-                Toast.makeText(
-                    this@EditProfileActivity,
-                    "Не удалось загрузить профиль",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this@EditProfileActivity, "Не удалось загрузить профиль", Toast.LENGTH_SHORT).show()
                 finish()
                 return@launch
             }
@@ -120,6 +116,8 @@ class EditProfileActivity : ComponentActivity() {
 
             telegramField.setText(user.telegram ?: "")
             phoneField.setText(user.phone ?: "")
+
+            oldAvatarPath = user.avatarPath // Сохраняем путь к старой аватарке
 
             val avatarFile = user.avatarPath?.let(::File)?.takeIf { it.exists() }
             if (avatarFile != null) {
@@ -144,13 +142,11 @@ class EditProfileActivity : ComponentActivity() {
         val telegram = telegramField.text.toString().trim()
         val phone = phoneField.text.toString().trim()
 
-        val currentPassword = currentPasswordField.text.toString()
-        val newPassword = newPasswordField.text.toString()
-        val repeatPassword = repeatPasswordField.text.toString()
+        val currentPassword = currentPasswordField.text.toString().trim()
+        val newPassword = newPasswordField.text.toString().trim()
+        val repeatPassword = repeatPasswordField.text.toString().trim()
 
-        if (name.isEmpty() || surname.isEmpty() ||
-            login.isEmpty() || email.isEmpty()
-        ) {
+        if (name.isEmpty() || surname.isEmpty() || login.isEmpty() || email.isEmpty()) {
             showMessage("Заполните все основные поля")
             return
         }
@@ -160,16 +156,10 @@ class EditProfileActivity : ComponentActivity() {
             return
         }
 
-        val changingPassword =
-            currentPassword.isNotEmpty() ||
-                    newPassword.isNotEmpty() ||
-                    repeatPassword.isNotEmpty()
+        val changingPassword = currentPassword.isNotEmpty() || newPassword.isNotEmpty() || repeatPassword.isNotEmpty()
 
         if (changingPassword) {
-            if (currentPassword.isEmpty() ||
-                newPassword.isEmpty() ||
-                repeatPassword.isEmpty()
-            ) {
+            if (currentPassword.isEmpty() || newPassword.isEmpty() || repeatPassword.isEmpty()) {
                 showMessage("Заполните все поля смены пароля")
                 return
             }
@@ -196,29 +186,29 @@ class EditProfileActivity : ComponentActivity() {
                     val user = dao.getUserByLogin(oldLogin)
                         ?: return@withContext "Пользователь не найден"
 
-                    if (dao.isLoginTaken(login, user.id)) {
+                    if (login != oldLogin && dao.isLoginTaken(login, user.id)) {
                         return@withContext "Этот логин уже занят"
                     }
 
-                    val userManager = UserManager(
-                        UsersDbProvider.get(applicationContext)
-                    )
-
+                    val userManager = UserManager(UsersDbProvider.get(applicationContext))
                     var passwordHash = user.password
 
                     if (changingPassword) {
                         if (userManager.hashPassword(currentPassword) != user.password) {
                             return@withContext "Неверный текущий пароль"
                         }
-
                         passwordHash = userManager.hashPassword(newPassword)
                     }
 
                     var newAvatarPath = user.avatarPath
+
+                    // Если выбрана новая аватарка, сохраняем её и удаляем старую
                     if (selectedImageUri != null) {
                         val savedPath = saveImageToInternalStorage(selectedImageUri!!)
                         if (savedPath != null) {
                             newAvatarPath = savedPath
+                            // Удаляем старую аватарку, чтобы не засорять память
+                            oldAvatarPath?.let { File(it) }?.takeIf { it.exists() }?.delete()
                         }
                     }
 
@@ -230,7 +220,6 @@ class EditProfileActivity : ComponentActivity() {
                             email = email,
                             password = passwordHash,
                             avatarPath = newAvatarPath,
-                            // СОХРАНЕНИЕ НОВЫХ ПОЛЕЙ (если пусто — пишем null)
                             telegram = telegram.ifBlank { null },
                             phone = phone.ifBlank { null }
                         )
@@ -248,7 +237,7 @@ class EditProfileActivity : ComponentActivity() {
                 }
 
             } catch (e: Exception) {
-                showMessage("Ошибка при сохранении профиля")
+                showMessage("Ошибка при сохранении профиля: ${e.message}")
             } finally {
                 saveButton.isEnabled = true
             }
@@ -266,7 +255,6 @@ class EditProfileActivity : ComponentActivity() {
                     input.copyTo(output)
                 }
             }
-
             file.absolutePath
         } catch (e: Exception) {
             e.printStackTrace()

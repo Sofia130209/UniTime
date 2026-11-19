@@ -21,14 +21,14 @@ interface UniTimeApi {
         @Field("email") email: String,
         @Field("name") name: String,
         @Field("surname") surname: String
-    ): Response<ResponseBody>
+    ): Response<RegisterResponse>
 
     @FormUrlEncoded
     @POST("login.php")
     suspend fun loginUser(
         @Field("login") login: String,
         @Field("password") password: String
-    ): Response<ResponseBody>
+    ): Response<LoginResponse> // <-- ИЗМЕНЕНО: теперь возвращает LoginResponse
 
     @Multipart
     @POST("update_profile.php")
@@ -39,7 +39,7 @@ interface UniTimeApi {
         @Part("telegram") telegram: RequestBody?,
         @Part("phone") phone: RequestBody?,
         @Part avatar: MultipartBody.Part?
-    ): Response<ResponseBody>
+    ): Response<UpdateProfileResponse>
 
     // ===== МЕРОПРИЯТИЯ =====
 
@@ -56,7 +56,7 @@ interface UniTimeApi {
         @Field("location") location: String,
         @Field("participants_limit") participantsLimit: Int,
         @Field("created_by_login") createdByLogin: String
-    ): Response<ResponseBody>
+    ): Response<CreateEventResponse>
 
     @FormUrlEncoded
     @POST("delete_event.php")
@@ -95,7 +95,36 @@ interface UniTimeApi {
     ): Response<ResponseBody>
 }
 
-// Data class для ответа от get_event_participants.php
+// ===== DATA CLASSES (Вынесены за пределы интерфейса!) =====
+
+data class RegisterResponse(
+    val success: Boolean,
+    val message: String? = null,
+    val error: String? = null,
+    val user_id: Int? = null
+)
+
+data class LoginResponse(
+    val success: Boolean,
+    val message: String? = null,
+    val error: String? = null,
+    val user: UserDto? = null // <-- ГЛАВНОЕ: данные пользователя при успешном входе
+)
+
+data class UpdateProfileResponse(
+    val success: Boolean,
+    val message: String? = null,
+    val error: String? = null,
+    val avatar_url: String? = null
+)
+
+data class CreateEventResponse(
+    val success: Boolean,
+    val message: String? = null,
+    val error: String? = null,
+    val event_id: Int? = null
+)
+
 data class ParticipantsResponse(
     val success: Boolean,
     val count: Int,
