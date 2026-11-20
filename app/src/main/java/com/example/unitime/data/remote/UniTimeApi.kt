@@ -78,7 +78,10 @@ interface UniTimeApi {
         @Field("event_id") eventId: Long,
         @Field("user_login") userLogin: String
     ): Response<JoinEventResponse>
-
+    @GET("get_user.php")
+    suspend fun getUserByLogin(
+        @Query("login") login: String
+    ): Response<UserProfileResponse>
     @Multipart
     @POST("upload_avatar.php")
     suspend fun uploadAvatar(
@@ -86,7 +89,11 @@ interface UniTimeApi {
         @Part avatar: MultipartBody.Part
     ): Response<ResponseBody>
 }
-
+data class UserProfileResponse(
+    val success: Boolean,
+    val error: String? = null,
+    val user: UserDto? = null
+)
 data class RegisterResponse(val success: Boolean, val message: String? = null, val error: String? = null, val user_id: Int? = null)
 data class LoginResponse(val success: Boolean, val message: String? = null, val error: String? = null, val user: UserDto? = null)
 data class JoinEventResponse(val success: Boolean, val error: String? = null, val message: String? = null)

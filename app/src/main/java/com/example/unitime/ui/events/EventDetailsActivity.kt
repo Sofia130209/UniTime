@@ -48,7 +48,6 @@ class EventDetailsActivity : AppCompatActivity() {
         val location = intent.getStringExtra(EXTRA_LOCATION) ?: ""
         val limit = intent.getIntExtra(EXTRA_PARTICIPANTS, 0)
 
-        // 2. Находим View элементы и заполняем их
         findViewById<TextView>(R.id.detailTitle).text = title
         findViewById<TextView>(R.id.detailDescription).text = if (description.isBlank()) "Описание не добавлено." else description
         findViewById<TextView>(R.id.detailCategory).text = category
@@ -61,14 +60,11 @@ class EventDetailsActivity : AppCompatActivity() {
         joinButton = findViewById(R.id.detailJoinButton)
         findViewById<TextView>(R.id.backButton).setOnClickListener { finish() }
 
-        // 3. Настраиваем RecyclerView для участников
         rvParticipants = findViewById(R.id.rvParticipantsList)
         rvParticipants.layoutManager = LinearLayoutManager(this)
 
-        // 4. Получаем логин текущего пользователя
         currentUserLogin = SessionManager(this).userLogin
 
-        // 5. Загружаем участников с сервера
         loadParticipantsFromServer(limit)
 
         joinButton.setOnClickListener {

@@ -16,6 +16,7 @@ import com.example.unitime.R
 import com.example.unitime.data.local.db.auth.UsersDbProvider
 import com.example.unitime.data.local.db.events.EventsDbProvider
 import com.example.unitime.data.managers.SessionManager
+import com.example.unitime.data.remote.RetrofitClient
 import com.example.unitime.data.repo.EventParticipantRepository
 import com.example.unitime.ui.BottomNavigationHelper
 import com.example.unitime.ui.events.ProfileEventsAdapter
@@ -29,9 +30,6 @@ import java.io.File
 class ProfileActivity : ComponentActivity() {
 
     private lateinit var session: SessionManager
-
-    // НОВОЕ: Логин пользователя, чей профиль мы просматриваем.
-    // Если null, по умолчанию берем логин текущего пользователя.
     private var targetLogin: String? = null
 
     private lateinit var avatarField: ImageView
@@ -46,8 +44,6 @@ class ProfileActivity : ComponentActivity() {
         setContentView(R.layout.activity_profile)
 
         session = SessionManager(this)
-
-        // Проверяем, передали ли нам логин через Intent (из списка участников)
         targetLogin = intent.getStringExtra(EXTRA_USER_LOGIN) ?: session.userLogin
         val login = targetLogin
 
@@ -88,7 +84,6 @@ class ProfileActivity : ComponentActivity() {
             }
         }
 
-        // Передаем login в методы загрузки
         loadUserData(login)
         setupEvents(login)
         setupButtons()
@@ -103,36 +98,82 @@ class ProfileActivity : ComponentActivity() {
         targetLogin?.let { loadUserData(it) }
     }
 
+    // === ИСПРАВЛЕННЫЙ МЕТОД ЗАГРУЗКИ ===
     private fun loadUserData(login: String) {
         lifecycleScope.launch {
-            val user = withContext(Dispatchers.IO) {
-                UsersDbProvider.get(applicationContext)
-                    .getUsersDao()
-                    .getUserByLogin(login)
-            }
+            try {
+                // 1. Пытаемся получить данные с сервера (для чужих профилей)
+                val response = RetrofitClient.api.getUserByLogin(login)
 
-            if (user != null) {
-                nameText.text = "${user.name} ${user.surname}".trim()
-                loginText.text = "@${user.login}"
-                emailText.text = user.email
-
-                telegramText.text = if (user.telegram.isNullOrBlank()) "Не указан" else user.telegram
-                phoneText.text = if (user.phone.isNullOrBlank()) "Не указан" else user.phone
-
-                val avatarFile = user.avatarPath?.let(::File)?.takeIf { it.exists() }
-                if (avatarFile != null) {
-                    avatarField.load(avatarFile) {
-                        crossfade(true)
-                        placeholder(R.drawable.ic_profile_placeholder)
-                        error(R.drawable.ic_profile_placeholder)
-                        transformations(CircleCropTransformation())
+                if (response.isSuccessful && response.body()?.success == true) {
+                    val userDto = response.body()?.user
+                    if (userDto != null) {
+                        updateUIFromDto(userDto)
+                        return@launch // Успешно загрузили, выходим
                     }
-                } else {
-                    avatarField.setImageResource(R.drawable.ic_profile_placeholder)
                 }
-            } else {
-                Toast.makeText(this@ProfileActivity, "Пользователь не найден", Toast.LENGTH_SHORT).show()
+
+                // 2. Если с сервера не вышло, ищем в локальной БД (фоллбэк для своего профиля без интернета)
+                val localUser = withContext(Dispatchers.IO) {
+                    UsersDbProvider.get(applicationContext).getUsersDao().getUserByLogin(login)
+                }
+
+                if (localUser != null) {
+                    updateUIFromLocal(localUser)
+                } else {
+                    Toast.makeText(this@ProfileActivity, "Пользователь не найден", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                // При ошибке сети тоже пробуем локальную БД
+                val localUser = withContext(Dispatchers.IO) {
+                    UsersDbProvider.get(applicationContext).getUsersDao().getUserByLogin(login)
+                }
+                if (localUser != null) {
+                    updateUIFromLocal(localUser)
+                } else {
+                    Toast.makeText(this@ProfileActivity, "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
+        }
+    }
+
+    private fun updateUIFromDto(user: com.example.unitime.data.remote.UserDto) {
+        nameText.text = "${user.name} ${user.surname}".trim().ifBlank { "Пользователь" }
+        loginText.text = "@${user.login}"
+        emailText.text = user.email ?: "Не указан"
+        telegramText.text = if (user.telegram.isNullOrBlank()) "Не указан" else user.telegram
+        phoneText.text = if (user.phone.isNullOrBlank()) "Не указан" else user.phone
+
+        if (!user.avatarUrl.isNullOrBlank()) {
+            val fullUrl = if (user.avatarUrl.startsWith("http")) user.avatarUrl else "http://87.232.69.164/${user.avatarUrl}"
+            avatarField.load(fullUrl) {
+                crossfade(true)
+                placeholder(R.drawable.ic_profile_placeholder)
+                error(R.drawable.ic_profile_placeholder)
+                transformations(CircleCropTransformation())
+            }
+        } else {
+            avatarField.setImageResource(R.drawable.ic_profile_placeholder)
+        }
+    }
+
+    private fun updateUIFromLocal(user: com.example.unitime.data.local.model.User) {
+        nameText.text = "${user.name} ${user.surname}".trim()
+        loginText.text = "@${user.login}"
+        emailText.text = user.email ?: "Не указан"
+        telegramText.text = if (user.telegram.isNullOrBlank()) "Не указан" else user.telegram
+        phoneText.text = if (user.phone.isNullOrBlank()) "Не указан" else user.phone
+
+        val avatarFile = user.avatarPath?.let(::File)?.takeIf { it.exists() }
+        if (avatarFile != null) {
+            avatarField.load(avatarFile) {
+                crossfade(true)
+                placeholder(R.drawable.ic_profile_placeholder)
+                error(R.drawable.ic_profile_placeholder)
+                transformations(CircleCropTransformation())
+            }
+        } else {
+            avatarField.setImageResource(R.drawable.ic_profile_placeholder)
         }
     }
 
@@ -170,13 +211,11 @@ class ProfileActivity : ComponentActivity() {
     }
 
     private fun setupButtons() {
-        // Находим саму карточку выхода и кнопку редактирования аватара по их ID из XML
         val btnEditProfile = findViewById<View>(R.id.editProfileButton)
         val logoutCard = findViewById<View>(R.id.logoutCard)
         val blocktext = findViewById<TextView>(R.id.emptyEventsText)
-        // Проверяем, наш это профиль или чужой
+
         if (targetLogin == session.userLogin) {
-            // Это МОЙ профиль: показываем элементы
             btnEditProfile.visibility = View.VISIBLE
             logoutCard.visibility = View.VISIBLE
 
@@ -184,7 +223,6 @@ class ProfileActivity : ComponentActivity() {
                 startActivity(Intent(this, EditProfileActivity::class.java))
             }
 
-            // Вешаем клик на всю карточку, а не только на текст
             logoutCard.setOnClickListener {
                 session.clear()
                 val intent = Intent(this, LoginActivity::class.java).apply {
@@ -194,7 +232,6 @@ class ProfileActivity : ComponentActivity() {
                 finish()
             }
         } else {
-            // Это ЧУЖОЙ профиль: скрываем элементы полностью (они исчезнут и не будут занимать место)
             btnEditProfile.visibility = View.GONE
             logoutCard.visibility = View.GONE
             blocktext.visibility = View.GONE
