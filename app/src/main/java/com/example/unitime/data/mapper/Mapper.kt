@@ -6,7 +6,6 @@ import com.example.unitime.data.remote.EventDto
 import com.example.unitime.data.remote.UserDto
 
 // --- ПОЛЬЗОВАТЕЛЬ ---
-
 fun UserDto.toEntity(): User {
     return User(
         id = this.id.toLong(),
@@ -35,29 +34,29 @@ fun User.toDto(): UserDto {
 }
 
 // --- СОБЫТИЯ ---
-
 fun EventDto.toEntity(): Event {
     return Event(
-        id = this.id.toLong(), // Если Event.id у тебя String, замени на .toString()
-        activityTitle = this.activityTitle,
-        activityDescription = this.activityDescription,
-        activityCategory = this.activityCategory,
-        activityDate = this.activityDate, // Если Event.activityDate у тебя Long, добавь .toLong()
-        activityLocation = this.activityLocation,
+        id = this.id,
+        activityTitle = this.activityTitle ?: "Без названия",
+        activityDescription = this.activityDescription ?: "",
+        activityCategory = this.activityCategory ?: "Другое",
+        activityDate = this.activityDate,
+        activityLocation = this.activityLocation ?: "",
         activityParticipants = this.activityParticipants,
-        createdByLogin = this.createdByLogin
+        createdByLogin = this.createdByLogin ?: ""
     )
 }
 
 fun Event.toDto(): EventDto {
     return EventDto(
-        id = this.id.toLong(), // Если EventDto.id у тебя String, замени на .toString()
-        activityTitle = this.activityTitle,
-        activityDescription = this.activityDescription,
-        activityCategory = this.activityCategory,
-        activityDate = this.activityDate, // Если EventDto.activityDate у тебя Long, добавь .toString()
-        activityLocation = this.activityLocation,
+        id = this.id,
+        activityTitle = this.activityTitle ?: "",
+        activityDescription = this.activityDescription ?: "",
+        activityCategory = this.activityCategory ?: "",
+        activityDate = this.activityDate,
+        activityLocation = this.activityLocation ?: "",
         activityParticipants = this.activityParticipants,
-        createdByLogin = this.createdByLogin
+        createdByLogin = this.createdByLogin ?: "",
+        currentParticipants = 0 // <-- ДОБАВЛЕНО: обязательное поле для EventDto
     )
 }

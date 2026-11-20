@@ -21,7 +21,6 @@ import com.example.unitime.data.managers.SessionManager
 import com.example.unitime.data.remote.RetrofitClient
 import com.example.unitime.data.repo.EventParticipantRepository
 import com.example.unitime.data.repo.EventRepository
-import com.example.unitime.data.repo.JoinResult
 import com.example.unitime.ui.auth.LoginActivity
 import com.example.unitime.ui.categories.CategoriesActivity
 import com.example.unitime.ui.events.AddEventActivity
@@ -79,7 +78,6 @@ class MainActivity : AppCompatActivity() {
 
         val userLogin = session.userLogin
 
-        // Настраиваем счетчики
         if (userLogin != null) {
             lifecycleScope.launch {
                 db.getEventsDao().observeCreatedCount(userLogin).collect { count ->
@@ -109,26 +107,67 @@ class MainActivity : AppCompatActivity() {
                     val login = userLogin ?: return@launch
 
                     if (adapter.isJoined(event.id)) {
-                        participantRepository.leaveEvent(event.id, login)
-                        adapter.markNotJoined(event.id)
-                        Toast.makeText(this@MainActivity, "Вы отменили запись", Toast.LENGTH_SHORT).show()
-                    } else {
-                        when (participantRepository.joinEvent(event.id, login)) {
-                            JoinResult.SUCCESS -> {
-                                adapter.markJoined(event.id)
-                                Toast.makeText(this@MainActivity, "Вы записались на мероприятие!", Toast.LENGTH_SHORT).show()
+                        // === ОТМЕНА ЗАПИСИ ===
+                        try {
+                            val response = RetrofitClient.api.leaveEventOnServer(event.id, login)
+                            if (response.isSuccessful && response.body()?.success == true) {
+                                // Удаляем из локальной БД — Flow мгновенно обновит счётчик на карточке
+                                participantRepository.leaveEvent(event.id, login)
+                                adapter.markNotJoined(event.id)
+                                Toast.makeText(this@MainActivity, "Вы отменили запись", Toast.LENGTH_SHORT).show()
+
+                                // ⚠️ ВАЖНО: showAllEventsHandler?.invoke() УБРАН!
+                                // Иначе он перезатрёт мгновенное обновление из Room
+                            } else {
+                                Toast.makeText(this@MainActivity, "Не удалось отменить запись", Toast.LENGTH_SHORT).show()
                             }
-                            JoinResult.ALREADY_JOINED -> {
-                                adapter.markJoined(event.id)
-                                Toast.makeText(this@MainActivity, "Вы уже записаны", Toast.LENGTH_SHORT).show()
-                            }
-                            JoinResult.FULL -> {
-                                Toast.makeText(this@MainActivity, "Свободных мест больше нет", Toast.LENGTH_SHORT).show()
-                            }
-                            JoinResult.USER_NOT_FOUND -> {
-                                Toast.makeText(this@MainActivity, "Пользователь не найден", Toast.LENGTH_SHORT).show()
-                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@MainActivity, "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
+                    } else {
+                        // === ЗАПИСЬ НА МЕРОПРИЯТИЕ ===
+                        try {
+                            val response = RetrofitClient.api.joinEventOnServer(event.id, login)
+                            val body = response.body()
+                            if (response.isSuccessful && body?.success == true) {
+                                // Добавляем в локальную БД — Flow мгновенно обновит счётчик на карточке
+                                participantRepository.joinEvent(event.id, login)
+                                adapter.markJoined(event.id)
+                                Toast.makeText(this@MainActivity, "Вы записались!", Toast.LENGTH_SHORT).show()
+
+                                // ⚠️ ВАЖНО: showAllEventsHandler?.invoke() УБРАН!
+                            } else {
+                                val errorMsg = when (body?.error) {
+                                    "Event is full" -> "Мест больше нет"
+                                    "Already joined" -> "Вы уже записаны"
+                                    else -> "Не удалось записаться"
+                                }
+                                Toast.makeText(this@MainActivity, errorMsg, Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(this@MainActivity, "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            },
+            onDeleteClick = { event ->
+                // === УДАЛЕНИЕ МЕРОПРИЯТИЯ ===
+                lifecycleScope.launch {
+                    try {
+                        val response = RetrofitClient.api.deleteEvent(event.id)
+                        if (response.isSuccessful) {
+                            val localDb = EventsDbProvider.get(this@MainActivity)
+                            localDb.getEventsDao().getById(event.id)?.let {
+                                localDb.getEventsDao().delete(it)
+                            }
+                            Toast.makeText(this@MainActivity, "Мероприятие удалено", Toast.LENGTH_SHORT).show()
+                            // Здесь перезагрузка НУЖНА, чтобы карточка исчезла
+                            showAllEventsHandler?.invoke()
+                        } else {
+                            Toast.makeText(this@MainActivity, "Не удалось удалить", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(this@MainActivity, "Ошибка сети: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
@@ -144,6 +183,7 @@ class MainActivity : AppCompatActivity() {
             participantJobs.clear()
 
             events.forEach { event ->
+                // 1. Следим за количеством участников (Flow из Room)
                 participantJobs.add(
                     lifecycleScope.launch {
                         participantRepository.observeParticipantCount(event.id).collect { count ->
@@ -151,6 +191,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 )
+                // 2. Следим за статусом "записан ли я"
                 participantJobs.add(
                     lifecycleScope.launch {
                         val login = userLogin ?: return@launch
@@ -169,25 +210,23 @@ class MainActivity : AppCompatActivity() {
         val emptyView = findViewById<View>(R.id.emptyView)
         var eventsJob: Job? = null
 
-        // === ГЛАВНОЕ ИЗМЕНЕНИЕ: Загрузка из облака с фоллбэком на локальную БД ===
         fun showAllEvents() {
             eventsJob?.cancel()
 
             eventsJob = lifecycleScope.launch {
                 try {
-                    // 1. Пытаемся загрузить события из облака
                     val response = RetrofitClient.api.getAllEvents()
+                    println("🌐 Ответ сервера: isSuccess=${response.isSuccessful}, body=${response.body()?.size ?: 0} событий")
 
                     if (response.isSuccessful && response.body() != null) {
                         val cloudEvents = response.body()!!
 
-                        // 2. Преобразуем DTO с сервера в локальные модели
                         val localEvents = cloudEvents.map { dto ->
                             Event(
                                 id = dto.id,
-                                activityTitle = dto.activityTitle,
+                                activityTitle = dto.activityTitle ?: "Без названия",
                                 activityDescription = dto.activityDescription ?: "",
-                                activityCategory = dto.activityCategory,
+                                activityCategory = dto.activityCategory ?: "Другое",
                                 activityDate = dto.activityDate,
                                 activityLocation = dto.activityLocation ?: "",
                                 activityParticipants = dto.activityParticipants,
@@ -195,14 +234,15 @@ class MainActivity : AppCompatActivity() {
                             )
                         }
 
-                        // 3. Показываем в адаптере
+                        println("✅ Преобразовано в локальные события: ${localEvents.size}")
+
                         adapter.submitList(localEvents) {
                             observeParticipantStates(localEvents)
                         }
                         emptyView.visibility = if (localEvents.isEmpty()) View.VISIBLE else View.GONE
 
                     } else {
-                        // Если сервер вернул ошибку, показываем локальные данные
+                        println("❌ Ошибка сервера, переключаемся на локальную БД")
                         repository.observeUpcoming().collect { events ->
                             adapter.submitList(events) {
                                 observeParticipantStates(events)
@@ -211,7 +251,7 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 } catch (e: Exception) {
-                    // Если нет интернета, показываем локальные данные
+                    println("❌ Исключение сети: ${e.message}")
                     repository.observeUpcoming().collect { events ->
                         adapter.submitList(events) {
                             observeParticipantStates(events)
@@ -224,7 +264,6 @@ class MainActivity : AppCompatActivity() {
 
         fun filterByTag(tagName: String) {
             eventsJob?.cancel()
-            // Для фильтрации пока используем локальную БД (можно доработать под сервер при необходимости)
             eventsJob = lifecycleScope.launch {
                 val tagId = repository.findTagIdByName(tagName)
 
@@ -265,5 +304,6 @@ class MainActivity : AppCompatActivity() {
         nav.post {
             BottomNavigationHelper.setup(this, R.id.nav_home)
         }
+        showAllEventsHandler?.invoke()
     }
 }

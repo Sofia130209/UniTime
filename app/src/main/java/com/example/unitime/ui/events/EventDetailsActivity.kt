@@ -22,11 +22,9 @@ import java.util.Date
 import java.util.Locale
 
 class EventDetailsActivity : AppCompatActivity() {
-
     private var isJoined = false
     private var eventId: Long = -1L
     private var currentUserLogin: String? = null
-
     private lateinit var joinButton: Button
     private lateinit var participantsText: TextView
     private lateinit var rvParticipants: RecyclerView
@@ -73,7 +71,6 @@ class EventDetailsActivity : AppCompatActivity() {
         // 5. Загружаем участников с сервера
         loadParticipantsFromServer(limit)
 
-        // 6. Обработчик кнопки "Присоединиться / Отменить запись"
         joinButton.setOnClickListener {
             val login = currentUserLogin
             if (login == null) {
@@ -87,18 +84,18 @@ class EventDetailsActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
                     if (!isJoined) {
-                        // Записываемся на мероприятие
-                        val response = RetrofitClient.api.joinEvent(eventId, login)
-                        if (response.isSuccessful) {
+                        // ИСПРАВЛЕНО: используем joinEventOnServer
+                        val response = RetrofitClient.api.joinEventOnServer(eventId, login)
+                        if (response.isSuccessful && response.body()?.success == true) {
                             isJoined = true
                             Toast.makeText(this@EventDetailsActivity, "Вы записались!", Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(this@EventDetailsActivity, "Не удалось записаться", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        // Отменяем запись
-                        val response = RetrofitClient.api.leaveEvent(eventId, login)
-                        if (response.isSuccessful) {
+                        // ИСПРАВЛЕНО: используем leaveEventOnServer
+                        val response = RetrofitClient.api.leaveEventOnServer(eventId, login)
+                        if (response.isSuccessful && response.body()?.success == true) {
                             isJoined = false
                             Toast.makeText(this@EventDetailsActivity, "Запись отменена", Toast.LENGTH_SHORT).show()
                         } else {
@@ -123,7 +120,6 @@ class EventDetailsActivity : AppCompatActivity() {
                 val response = RetrofitClient.api.getEventParticipants(eventId)
                 if (response.isSuccessful && response.body()?.success == true) {
                     val serverParticipants = response.body()!!.participants
-
                     val localUsers = serverParticipants.map { dto ->
                         User(
                             login = dto.login ?: "",
